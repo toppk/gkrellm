@@ -31,7 +31,7 @@
 |  as that of the covered work.
 */
 
-#include "configure.h"
+/* #include "configure.h" */
 
   /* Debugs for debug_level	*/
 #define DEBUG_SYSDEP		0x1

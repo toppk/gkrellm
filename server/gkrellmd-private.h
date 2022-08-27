@@ -31,7 +31,7 @@
 |  as that of the covered work.
 */
 
-#include "configure.h"
+/* #include "configure.h" */
 
 #include "../src/gkrellm-sysdeps.h"
 
