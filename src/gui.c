@@ -1648,11 +1648,11 @@ gkrellm_load_theme_config(void)
 	if (!_GK.theme_path || !g_file_test(_GK.theme_path, G_FILE_TEST_IS_DIR))
 		gkrellm_dup_string(&_GK.theme_path, "");
 	if (!large_font.string)
-		gkrellm_dup_string(&large_font.string, "Serif 11");
+		gkrellm_dup_string(&large_font.string, "Sans 11");
 	if (!normal_font.string)
-		gkrellm_dup_string(&normal_font.string, "Serif 9");
+		gkrellm_dup_string(&normal_font.string, "Sans 9");
 	if (!small_font.string)
-		gkrellm_dup_string(&small_font.string, "Serif 8");
+		gkrellm_dup_string(&small_font.string, "Sans 8");
 	}
 
 

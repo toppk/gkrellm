@@ -145,7 +145,7 @@ Popup main menu.
 .I "Btn 2"
 Slide
 .B gkrellm
-window shut (Btn1 if -m2 option).
+window shut (Btn1 if \-m2 option).
 .TP
 .I "Btn 3"
 Popup main menu.
@@ -281,8 +281,8 @@ Makes
 move to an
 .I (x,y)
 position on the screen at startup.  Standard X window geometry position
-(not size) formats are parsed, ie +x+y -x+y +x-y -x-y.  Except, negative
-geometry positions are not recognized (ie +-x--y ).
+(not size) formats are parsed, ie +x+y \-x+y +x\-y \-x\-y.  Except, negative
+geometry positions are not recognized (ie +-x\-\-y ).
 .TP
 .B \-wm
 Forces
@@ -438,7 +438,7 @@ then you can configure an alternative with:
 .PP
 .RS
 .nf
-ln  -s  /var/lock/LCK..ttySx   ~/.gkrellm2/LCK..modem
+ln  \-s  /var/lock/LCK..ttySx   ~/.gkrellm2/LCK..modem
 .fi
 .RE
 .IP
@@ -589,7 +589,7 @@ choose this method.  Example mount and umount entries using sudo:
 .PP
 .RS
 .nf
-sudo /bin/mount -t msdos /dev/fd0 /mnt/A
+sudo /bin/mount \-t msdos /dev/fd0 /mnt/A
 sudo /bin/umount /mnt/A
 .fi
 .RE
@@ -701,7 +701,7 @@ like so:
 .PP
 .RS
 .nf
-mbmon -r -P port-number
+mbmon \-r \-P port\-number
 .fi
 .RE
 .PP
@@ -741,7 +741,7 @@ getting /sysfs sensor data either by running:
 .PP
 .RS
 .nf
-gkrellm --without-libsensors
+gkrellm \-\-without\-libsensors
 .fi
 .RE
 .PP
@@ -814,7 +814,7 @@ out the sensor data source, run:
 .PP
 .RS
 .nf
-gkrellm -d 0x80
+gkrellm \-d 0x80
 .fi
 .RE
 .PP
@@ -1036,7 +1036,7 @@ can be rewritten:
     compute in5 (1 + 160/35.7)*@ - (160/35.7)*in0, ...
 
 so the correction factor is  (1 + 160/35.7) = 5.48
-and the correction offset is -(160/35.7) = -4.48
+and the correction offset is \-(160/35.7) = \-4.48
 and the voltage reference Vref is in0
 .fi
 .RE
@@ -1053,16 +1053,16 @@ lm80   in0 (24/14.7 + 1) * @        2.633     0       -
        in2 (22.1/30 + 1) * @        1.737     0       -
        in3 (2.8/1.9) * @            1.474     0       -
        in4 (160/30.1 + 1) * @       6.316     0       -
-       in5 (160/35.7)*(@-in0) + @   5.482    -4.482  in0
-       in6 (36/16.2)*(@-in0) + @    3.222    -2.222  in0
+       in5 (160/35.7)*(@\-in0) + @   5.482    \-4.482  in0
+       in6 (36/16.2)*(@\-in0) + @    3.222    \-2.222  in0
 
 LM78   in3 ((6.8/10)+1)*@           1.68      0       -
        in4 ((28/10)+1)*@            3.8       0       -
-       in5 -(210/60.4)*@           -3.477     0       -
-       in6 -(90.9/60.4)*@          -1.505     0       -
+       in5 \-(210/60.4)*@           \-3.477     0       -
+       in6 \-(90.9/60.4)*@          \-1.505     0       -
 
-w83782 in5 (5.14 * @) - 14.91       5.14    -14.91    -
-       in6 (3.14 * @) -  7.71       3.14     -7.71    -
+w83782 in5 (5.14 * @) \- 14.91       5.14    \-14.91    -
+       in6 (3.14 * @) \-  7.71       3.14     \-7.71    -
 
 .fi
 .RE
@@ -1077,7 +1077,7 @@ console command (doesn't have a graphical user interface), then
 the command must be run in a terminal window such as xterm, eterm,
 or Gnome terminal.  For example running the "top" command would take:
 .TP
-xterm -e top
+xterm \-e top
 .PP
 You can use the command launching feature to run commands related to
 monitoring functions, or you may use it to have a convenient launch
@@ -1094,13 +1094,13 @@ Some launch ideas for some monitors could be:
 gnomecal, evolution, or ical
 .TP
 .I CPU:
-xterm -e top or gps or gtop
+xterm \-e top or gps or gtop
 .TP
 .I inet:
-gftp or xterm -e ftpwho
+gftp or xterm \-e ftpwho
 .TP
 .I net:
-mozilla, galeon, skipstone, or xterm -e slrn -C-
+mozilla, galeon, skipstone, or xterm \-e slrn \-C\-
 .PP
 And so on... Tooltips can be set up for these commands.
 
@@ -1122,7 +1122,7 @@ could be configured to speak something.  For example a CPU temperature
 alert warn command could just speak the current temperature with:
 .nf
 
-    sh -c "echo warning C P U is at $s degrees | esddsp festival --tts"
+    sh \-c "echo warning C P U is at $s degrees | esddsp festival \-\-tts"
 
 .fi
 Assuming you have esd running.
@@ -1158,7 +1158,7 @@ used by running:
 .PP
 .RS
 .nf
-gkrellm -t path_to_theme
+gkrellm \-t path_to_theme
 .fi
 .RE
 .PP

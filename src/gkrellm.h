@@ -535,7 +535,7 @@ typedef struct
 	GkrellmCallback;
 
 
-#define CHART_WIDTH_MAX	1000
+#define CHART_WIDTH_MAX	1600
 #define CHART_WIDTH_MIN	25
 
   /* Each chart must have a GkrellmChartconfig struct associated with it.
