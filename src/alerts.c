@@ -1624,7 +1624,7 @@ gkrellm_alert_pixbuf(void)
 		width  = big_endian_uint(data + 16);
 		height = big_endian_uint(data + 20);
 
-		pixels = g_memdup((gconstpointer)(data + 24), height * stride);
+		pixels = g_memdup2((gconstpointer)(data + 24), height * stride);
 
 		alert_pixbuf = gdk_pixbuf_new_from_data(pixels,
 				GDK_COLORSPACE_RGB, TRUE, 8, width, height, stride,

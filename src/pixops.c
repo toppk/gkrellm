@@ -682,7 +682,7 @@ gkrellm_piximage_new_from_inline(const guint8 *data, gboolean copy_pixels)
 	width  = big_endian_uint(d + 16);
 	height = big_endian_uint(d + 20);
 
-	pixels = g_memdup((gconstpointer)(d + 24), height * stride);
+	pixels = g_memdup2((gconstpointer)(d + 24), height * stride);
 
 	pixbuf = gdk_pixbuf_new_from_data(pixels,
 				GDK_COLORSPACE_RGB, TRUE, 8, width, height, stride,
