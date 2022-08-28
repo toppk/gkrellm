@@ -119,38 +119,38 @@ endif
 
 # client
 # common
-src = ['src/alerts.c', 'src/base64.c', 'src/battery.c', 'src/chart.c', 'src/client.c',
-       'src/clock.c', 'src/config.c', 'src/cpu.c', 'src/deprecated.c', 'src/disk.c',
-       'src/fs.c', 'src/gui.c', 'src/hostname.c', 'src/inet.c', 'src/krell.c', 'src/mail.c',
-       'src/main.c', 'src/md5c.c', 'src/mem.c', 'src/net.c', 'src/panel.c', 'src/pixops.c',
-       'src/plugins.c', 'src/sysdeps-unix.c', 'src/utils.c']
+src = ['src/client/alerts.c', 'src/client/base64.c', 'src/client/battery.c', 'src/client/chart.c', 'src/client/client.c',
+       'src/client/clock.c', 'src/client/config.c', 'src/client/cpu.c', 'src/client/deprecated.c', 'src/client/disk.c',
+       'src/client/fs.c', 'src/client/gui.c', 'src/client/hostname.c', 'src/client/inet.c', 'src/client/krell.c', 'src/client/mail.c',
+       'src/client/main.c', 'src/client/md5c.c', 'src/client/mem.c', 'src/client/net.c', 'src/client/panel.c', 'src/client/pixops.c',
+       'src/client/plugins.c', 'src/client/sysdeps-unix.c', 'src/client/utils.c']
 # gui (+extras for windows)
 if host_system == 'windows'
-   src += ['src/winops-win32.c', 'src/win32-plugin.c', 'src/win32-libgkrellm.c']
+   src += ['src/client/winops-win32.c', 'src/client/win32-plugin.c', 'src/client/win32-libgkrellm.c']
 elif host_system == 'darwin'
-   src += ['src/winops-gtk-mac.c']
+   src += ['src/client/winops-gtk-mac.c']
 else
-   src += ['src/winops-x11.c']
+   src += ['src/client/winops-x11.c']
 endif
 # sysdeps
 src += sysdepsrc
 
 if host_system != 'windows'
-   src += [ 'src/uptime.c', 'src/sensors.c', 'src/proc.c']
+   src += [ 'src/client/uptime.c', 'src/client/sensors.c', 'src/client/proc.c']
 endif
 
 
 
-server = ['server/mail.c', 'server/main.c', 'server/monitor.c', 'server/plugins.c',
-          'server/utils.c', 'server/sysdeps-unix.c']
+server = ['src/server/mail.c', 'src/server/main.c', 'src/server/monitor.c', 'src/server/plugins.c',
+          'src/server/utils.c', 'src/server/sysdeps-unix.c']
 if host_system == 'windows'
    sysdepargs += ['-DWIN32']
-   server += ['server/win32-libgkrellmd.c', 'server/win32-plugin.c']
+   server += ['src/server/win32-libgkrellmd.c', 'src/server/win32-plugin.c']
 endif
 server += sysdepsrc
 
-sharedh = include_directories('shared')
-shared = ['shared/log.c']
+sharedh = include_directories('src/shared')
+shared = ['src/shared/log.c']
 
 
 clientargs += sysdepargs

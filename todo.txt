@@ -20,7 +20,6 @@
     - cppcheck -f --enable=warning,performance,portability -j2 .
     - See also https://github.com/pukkaone/find-unnecessary-includes
       and https://code.google.com/p/include-what-you-use/
-* new directory structure for codebase
 * distro packaging
 * releasing
 * documentation

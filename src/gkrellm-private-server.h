@@ -31,9 +31,7 @@
 |  as that of the covered work.
 */
 
-/* #include "configure.h" */
-
-#include "../src/gkrellm-sysdeps.h"
+#include "../gkrellm-sysdeps.h"
 
 #if defined(WIN32)
 // Enable getaddrinfo on win32 if we target win xp or newer

@@ -35,12 +35,13 @@
 |  as that of the covered work.
 */
 
+#include "../gkrellm.h"
+#include "../gkrellm-private.h"
+#include "../gkrellm-sysdeps.h"
+
 #include "../inet.h" // For struct ActiveTCP
-#if defined(GKRELLM_SERVER)
-	#include "../../server/win32-plugin.h"
-#else
-	#include "../win32-plugin.h"
-#endif
+#include "../win32-plugin.h"
+
 
 #include <winioctl.h> // For cdrom eject
 #include <iphlpapi.h> // For tcp connection stats

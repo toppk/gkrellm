@@ -38,7 +38,7 @@
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
 #endif
-#include "../shared/log.h"
+#include "shared/log.h"
 
 #if !defined(WIN32)
 #include <sys/param.h>
