@@ -194,7 +194,7 @@ SYSDEPS = ../src/sysdeps/bsd-common.c ../src/sysdeps/bsd-net-open.c \
 	../src/sysdeps/openbsd.c ../src/sysdeps/sensors-common.c \
 	../src/sysdeps/solaris.c ../src/sysdeps/win32.c 
 
-GKRELLMD_H = gkrellmd.h gkrellmd-private.h
+GKRELLMD_H = ../src/gkrellm-server.h ../src/gkrellm-private-server.h
 
 main.o:		main.c $(GKRELLMD_H)
 monitor.o:	monitor.c $(GKRELLMD_H) 

@@ -23,7 +23,7 @@
 #ifndef WIN32_PLUGIN_H
 #define WIN32_PLUGIN_H
 
-#include "gkrellmd.h"
+#include "../src/gkrellm.h"
 
 typedef struct
 {

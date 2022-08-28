@@ -31,8 +31,8 @@
 |  as that of the covered work.
 */
 
-#include "gkrellmd.h"
-#include "gkrellmd-private.h"
+#include "../src/gkrellm.h"
+#include "../src/gkrellm-private.h"
 
 
 #if !defined(WIN32)

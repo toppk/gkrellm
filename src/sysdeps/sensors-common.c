@@ -37,7 +37,11 @@
 |  from daemons that can run under different operating systems.
 */
 
-#define SENSORS_COMMON	1
+/* #define SENSORS_COMMON	1 */
+
+#include "../gkrellm.h"
+#include "../gkrellm-private.h"
+#include "../gkrellm-sysdeps.h"
 
 /* --------------- Interface to mbmon daemon sensor reading ---------
 */

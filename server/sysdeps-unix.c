@@ -31,57 +31,13 @@
 |  as that of the covered work.
 */
 
-#include "gkrellmd.h"
-#include "gkrellmd-private.h"
+#include "../src/gkrellm.h"
+#include "../src/gkrellm-private.h"
 
 #include "../src/gkrellm-sysdeps.h"
 
-#if defined(__linux__)
-#include "../src/sysdeps/linux.c"
-#include "../src/sysdeps/sensors-common.c"
-#endif
-
-#if defined(__APPLE__)
-#include "../src/sysdeps/darwin.c"
-#include "../src/sysdeps/bsd-common.c"
-#endif
-
-#if defined(__FreeBSD__)
-#include "../src/sysdeps/freebsd.c"
-#include "../src/sysdeps/bsd-common.c"
-#include "../src/sysdeps/sensors-common.c"
-#endif
-
-#if defined(__DragonFly__)
-#include "../src/sysdeps/dragonfly.c"
-#include "../src/sysdeps/bsd-common.c"
-#include "../src/sysdeps/sensors-common.c"
-#endif
-
-#if defined(__NetBSD__)
-#include "../src/sysdeps/netbsd.c"
-#include "../src/sysdeps/bsd-net-open.c"
-#include "../src/sysdeps/bsd-common.c"
-#include "../src/sysdeps/sensors-common.c"
-#endif
-
-#if defined(__OpenBSD__)
-#include "../src/sysdeps/openbsd.c"
-#include "../src/sysdeps/bsd-net-open.c"
-#include "../src/sysdeps/bsd-common.c"
-#endif
-
-
-#if defined(__solaris__)
-#include "../src/sysdeps/solaris.c"
-#endif
-
 #if defined(USE_LIBGTOP)
 #include "../src/sysdeps/gtop.c"
-#endif
-
-#if defined(WIN32)
-#include "../src/sysdeps/win32.c"
 #endif
 
 #if !defined(WIN32)

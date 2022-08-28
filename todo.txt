@@ -1,12 +1,13 @@
 * charts to cairo
 * working on gtk3
 * nls/translation
+* optional libraries (sensors ntlm gnutls openssl gtop etc?)
 * no deprecations on gtk3
-* windows/macos/freebsd
+* windows/macos/freebsd sysdeps
 * wayland/no-X11
-* configuration location
+* configuration location ~/.config/gkrellm
 * plugins
-* improved protocol for daemon
+* improved protocol for daemon (versioning support)
 * apis for daemon
 * transparency
 * gtk4
@@ -15,7 +16,12 @@
 * clang / https://clang-analyzer.llvm.org/scan-build.html
 * warnings
 * valgrind
-*  cppcheck
+* cppcheck
     - cppcheck -f --enable=warning,performance,portability -j2 .
     - See also https://github.com/pukkaone/find-unnecessary-includes
       and https://code.google.com/p/include-what-you-use/
+* new directory structure for codebase
+* distro packaging
+* releasing
+* documentation
+* tabify

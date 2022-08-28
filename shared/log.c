@@ -56,13 +56,8 @@ Output should go to:
 #include <stdio.h>
 
 // Include gkrellm headers to access _GK struct inside gkrellm_debug()
-#if defined(GKRELLM_SERVER)
-	#include "../server/gkrellmd.h"
-	#include "../server/gkrellmd-private.h"
-#else
-	#include "../src/gkrellm.h"
-	#include "../src/gkrellm-private.h"
-#endif
+#include "../src/gkrellm.h"
+#include "../src/gkrellm-private.h"
 
 typedef struct _GkrellmLogFacility
 {

@@ -35,62 +35,17 @@
 #include "gkrellm-private.h"
 #include "gkrellm-sysdeps.h"
 
-
-
-#if defined(__linux__)
-#include "sysdeps/linux.c"
-#include "sysdeps/sensors-common.c"
-#endif
-
-#if defined(__APPLE__)
-#include "sysdeps/darwin.c"
-#include "sysdeps/bsd-common.c"
-#endif
-
-#if defined(__FreeBSD__)
-#include "sysdeps/freebsd.c"
-#include "sysdeps/bsd-common.c"
-#include "sysdeps/sensors-common.c"
-#endif
-
-#if defined(__DragonFly__)
-#include "sysdeps/dragonfly.c"
-#include "sysdeps/bsd-common.c"
-#include "sysdeps/sensors-common.c"
-#endif
-
-#if defined(__NetBSD__)
-#include "sysdeps/netbsd.c"
-#include "sysdeps/bsd-net-open.c"
-#include "sysdeps/bsd-common.c"
-#include "sysdeps/sensors-common.c"
-#endif
-
-#if defined(__OpenBSD__)
-#include "sysdeps/openbsd.c"
-#include "sysdeps/bsd-net-open.c"
-#include "sysdeps/bsd-common.c"
-#endif
-
-#if defined(__solaris__)
-#include "sysdeps/solaris.c"
-#endif
-
 #if defined(USE_LIBGTOP)
 #include "sysdeps/gtop.c"
-#endif
-
-#if defined(WIN32)
-#include "sysdeps/win32.c"
 #endif
 
 #if !defined(WIN32)
 #include <sys/utsname.h>
 #endif
 
-#if !defined(SENSORS_COMMON) && !defined(WIN32)
-static gboolean (*mbmon_check_func)();
-#endif
+/* needed for mbmon functions */
+gboolean gkrellm_sys_sensors_mbmon_check(gboolean force);
+
 
 gchar *
 gkrellm_sys_get_host_name(void)
@@ -123,19 +78,18 @@ gboolean
 gkrellm_sys_sensors_mbmon_port_change(gint port)
 	{
 	gboolean	result = FALSE;
-#if !defined(WIN32)
+#if !defined(WIN32) && defined(SENSORS_COMMON)
 	_GK.mbmon_port = port;
 
+	/* TODO: does it matter if it has run or not? */
 	/* mbmon_check_func will be set if sysdep code has included
 	|  sensors_common.c and has run gkrellm_sys_sensors_mbmon_check()
 	*/
-	if (mbmon_check_func)
-		{
-		gkrellm_sensors_interface_remove(MBMON_INTERFACE);
-		result = (*mbmon_check_func)(TRUE);
-		gkrellm_sensors_model_update();
-		gkrellm_sensors_rebuild(TRUE, TRUE, TRUE);
-		}
+	gkrellm_sensors_interface_remove(MBMON_INTERFACE);
+	result = gkrellm_sys_sensors_mbmon_check(TRUE);
+	gkrellm_sensors_model_update();
+	gkrellm_sensors_rebuild(TRUE, TRUE, TRUE);
+
 #endif
 	return result;
 	}
@@ -143,8 +97,10 @@ gkrellm_sys_sensors_mbmon_port_change(gint port)
 gboolean
 gkrellm_sys_sensors_mbmon_supported(void)
 	{
-#if !defined(WIN32)
-	return mbmon_check_func ? TRUE : FALSE;
+#if !defined(WIN32) && defined(SENSORS_COMMON)
+		/* TODO: does it matter if it has run or not? */
+		return TRUE;
+		/* return mbmon_check_func ? TRUE : FALSE; */
 #else
 	return FALSE;
 #endif

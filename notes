@@ -1,0 +1,8 @@
+# dev cmds
+meson --cross-file=mingw-cross.txt buildwine
+meson setup builddir
+ninja -C builddir
+
+
+# docs
+* gtop plugin was written against very old versions of libgtop

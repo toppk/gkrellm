@@ -42,6 +42,10 @@
 #include <inttypes.h>
 
 
+#include "../gkrellm.h"
+#include "../gkrellm-private.h"
+#include "../gkrellm-sysdeps.h"
+
 static gboolean		need_locale_fix,
 					have_diskstats,
 					have_partition_stats,
