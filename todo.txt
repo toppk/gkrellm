@@ -1,0 +1,21 @@
+* charts to cairo
+* working on gtk3
+* nls/translation
+* no deprecations on gtk3
+* windows/macos/freebsd
+* wayland/no-X11
+* configuration location
+* plugins
+* improved protocol for daemon
+* apis for daemon
+* transparency
+* gtk4
+* new readfile on linux
+* D_FORTIFY_SOURCES=N
+* clang / https://clang-analyzer.llvm.org/scan-build.html
+* warnings
+* valgrind
+*  cppcheck
+    - cppcheck -f --enable=warning,performance,portability -j2 .
+    - See also https://github.com/pukkaone/find-unnecessary-includes
+      and https://code.google.com/p/include-what-you-use/

@@ -2658,7 +2658,7 @@ cb_force(GtkWidget *button, NetMon *net)
 	{
 	if (enable_in_progress)
 		return;
-	net->force_up = gtk_toggle_button_get_active(button);
+	net->force_up = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 	if (net != net_timed)
 		net->locked = FALSE;
 	sync_chart(net);
@@ -2668,7 +2668,7 @@ static void
 cb_enable(GtkWidget *button, NetMon *net)
 	{
 	enable_in_progress = TRUE;
-	net->enabled = gtk_toggle_button_get_active(button);
+	net->enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 	if (net->force_button)
 		{
 		if (net->enabled)
@@ -2842,7 +2842,7 @@ cb_timer_enable(GtkWidget *button, gpointer data)
 static void
 cb_timer_seconds(GtkWidget *button, gpointer data)
 	{
-	timer_seconds = gtk_toggle_button_get_active(button);
+	timer_seconds = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 	gkrellm_panel_destroy(timer_panel);
 	create_net_timer(timer_vbox, TRUE);
 	draw_timer(timer_panel, last_time , 1);
@@ -2949,7 +2949,7 @@ cb_reset_mday(GtkWidget *widget, GtkSpinButton *spin)
 static void
 cb_net_enabled_as_default(GtkWidget *button, gpointer data)
 	{
-	net_enabled_as_default = gtk_toggle_button_get_active(button);
+	net_enabled_as_default = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 	}
 
 static void
@@ -3092,15 +3092,15 @@ create_net_tab(GtkWidget *tab_vbox)
 
 	if (!_GK.client_mode)
 		{
-		timer_iface_combo_box = gtk_combo_box_entry_new_text();
+		timer_iface_combo_box = gtk_combo_box_text_new_with_entry();
 		gtk_box_pack_start(GTK_BOX(hbox), timer_iface_combo_box, TRUE, TRUE, 0);
 		gtk_widget_set_sensitive(timer_iface_combo_box, timer_button_enabled);
-		gtk_combo_box_append_text(GTK_COMBO_BOX(timer_iface_combo_box),
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(timer_iface_combo_box),
 			_("none"));
 		for (tlist = timer_defaults_list; tlist; tlist = tlist->next)
 			{
 			tt = (TimerType *) tlist->data;
-			gtk_combo_box_append_text(GTK_COMBO_BOX(timer_iface_combo_box),
+			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(timer_iface_combo_box),
 				tt->name);
 			}
 		gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(
@@ -3202,23 +3202,23 @@ create_net_tab(GtkWidget *tab_vbox)
 	vbox1 = gkrellm_gtk_category_vbox(vbox,
 				_("Format String for Chart Labels"),
 				4, 0, TRUE);
-	text_format_combo_box = gtk_combo_box_entry_new_text();
+	text_format_combo_box = gtk_combo_box_text_new_with_entry();
 	gtk_widget_set_size_request (GTK_WIDGET(text_format_combo_box), 300, -1);
 	gtk_box_pack_start(GTK_BOX(vbox1), text_format_combo_box, FALSE, FALSE, 2);
-	gtk_combo_box_append_text(GTK_COMBO_BOX(text_format_combo_box), text_format);
-	gtk_combo_box_append_text(GTK_COMBO_BOX(text_format_combo_box),
-		DEFAULT_TEXT_FORMAT);
-	gtk_combo_box_append_text(GTK_COMBO_BOX(text_format_combo_box),
-		"\\c\\f$M\\n$T\\b\\c\\f$L");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(text_format_combo_box),
-		_("\\f\\ww\\c\\f$M\\n\\f\\at\\.$t\\n\\f\\ar\\.$r\\b\\c\\f$L"));
-	gtk_combo_box_append_text(GTK_COMBO_BOX(text_format_combo_box),
-		_("\\f\\ww\\c\\f$M\\n\\f\\at\\.$o\\n\\f\\ar\\.$i\\b\\c\\f$L"));
-	gtk_combo_box_append_text(GTK_COMBO_BOX(text_format_combo_box),
-		_("\\f\\ww\\c\\f$M\\D2\\f\\ar\\.$r\\D1\\f\\at\\.$t\\b\\c\\f$L"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(text_format_combo_box), text_format);
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(text_format_combo_box),
+								   DEFAULT_TEXT_FORMAT);
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(text_format_combo_box),
+								   "\\c\\f$M\\n$T\\b\\c\\f$L");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(text_format_combo_box),
+								   _("\\f\\ww\\c\\f$M\\n\\f\\at\\.$t\\n\\f\\ar\\.$r\\b\\c\\f$L"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(text_format_combo_box),
+								   _("\\f\\ww\\c\\f$M\\n\\f\\at\\.$o\\n\\f\\ar\\.$i\\b\\c\\f$L"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(text_format_combo_box),
+								   _("\\f\\ww\\c\\f$M\\D2\\f\\ar\\.$r\\D1\\f\\at\\.$t\\b\\c\\f$L"));
 	gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(text_format_combo_box))),
 		text_format);
-	g_signal_connect(G_OBJECT(GTK_COMBO_BOX(text_format_combo_box)), "changed",
+	g_signal_connect(G_OBJECT(text_format_combo_box), "changed",
 			G_CALLBACK(cb_text_format), NULL);
 
 	vbox1 = gkrellm_gtk_category_vbox(vbox,

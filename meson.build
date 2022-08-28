@@ -3,13 +3,13 @@ version: '2.99.0',
 license: 'GPL')
 host_system = host_machine.system()
 
-gtk2 = dependency('gtk+-2.0', version : '>=2.4')
-glib = dependency('glib-2.0', version : '>=2.32')
-x11 = dependency('x11', version: '>= 1.0.0')
-x11sm = dependency('sm', version: '>= 1.0.0')
-x11ice = dependency('ice', version: '>= 1.0.0')
-openssl = dependency('openssl', version: '>= 1.0.0', required : false)
-gmodule = dependency('gmodule-2.0', version : '>=2.32')
+gtk = dependency('gtk+-2.0', version : '>=2.24.33')
+glib = dependency('glib-2.0', version : '>= 2.72.3')
+x11 = dependency('x11', version: '>= 1.7.3.1')
+x11sm = dependency('sm', version: '>= 1.2.3')
+x11ice = dependency('ice', version: '>= 1.0.10')
+openssl = dependency('openssl', version: '>= 3.0.5', required : false)
+gmodule = dependency('gmodule-2.0', version : '>=2.72.3')
 cc = meson.get_compiler('c')
 m_dep = cc.find_library('m', required : false)
 
@@ -19,12 +19,19 @@ else
    extra_args = []
 endif
 
-if 1 == 0
+if 1 == 1
    extra_args += ['-DGDK_DISABLE_DEPRECATED', '-DGTK_DISABLE_DEPRECATED' ]
 endif
 if 1 == 1
    extra_args += ['-DGSEAL_ENABLE']
 endif
+if 1 == 1
+   extra_args += ['-Wno-deprecated-declarations']
+endif
+if 1 == 1
+   extra_args += ['-Wno-implicit-function-declaration']
+endif
+
 
 src = ['src/alerts.c', 'src/base64.c', 'src/battery.c', 'src/chart.c', 'src/client.c',
        'src/clock.c', 'src/config.c', 'src/cpu.c', 'src/deprecated.c', 'src/disk.c',
@@ -53,5 +60,5 @@ shared = ['shared/log.c']
 
 host_system = host_machine.system()
 
-client = executable('gkrellm', shared + src, dependencies : [gtk2, glib, gmodule, x11, x11sm, x11ice, openssl, m_dep], include_directories: sharedh, c_args: extra_args)
+client = executable('gkrellm', shared + src, dependencies : [gtk, glib, gmodule, x11, x11sm, x11ice, openssl, m_dep], include_directories: sharedh, c_args: extra_args)
 daemon = executable('gkrellmd', shared + server, dependencies : [glib, gmodule], include_directories: sharedh, c_args: extra_args + ['-DGKRELLM_SERVER'])

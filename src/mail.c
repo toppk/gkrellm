@@ -4100,7 +4100,7 @@ create_mail_tab(GtkWidget *tab_vbox)
 	gtk_misc_set_alignment(GTK_MISC(label), 1.0, 0.5);
 	gtk_table_attach_defaults(GTK_TABLE(table), label, 2, 3, 0, 1);
 
-	remote_combo_box = gtk_combo_box_new_text();
+	remote_combo_box = gtk_combo_box_text_new();
 	gtk_table_attach_defaults(GTK_TABLE(table), remote_combo_box, 3, 4, 0,1);
 	for (i = 0; auth_strings[i].string != NULL; ++i)
             gtk_combo_box_append_text(GTK_COMBO_BOX(remote_combo_box), auth_strings[i].string);
@@ -4114,7 +4114,7 @@ create_mail_tab(GtkWidget *tab_vbox)
 	gtk_misc_set_alignment(GTK_MISC(label), 1.0, 0.5);
 	gtk_table_attach_defaults(GTK_TABLE(table), label, 2, 3, i, i+1);
 
-	ssl_combo_box = gtk_combo_box_new_text();
+	ssl_combo_box = gtk_combo_box_text_new();
 	gtk_table_attach_defaults(GTK_TABLE(table), ssl_combo_box, 3, 4, i, i+1);
 	++i;
         gtk_combo_box_append_text(GTK_COMBO_BOX(ssl_combo_box), _("No"));

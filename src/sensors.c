@@ -2799,7 +2799,7 @@ create_sensors_tab(GtkWidget *tab_vbox)
 
 	box = gkrellm_gtk_framed_vbox(vbox1, _("Location"), 2, FALSE, 0, 2);
 
-	optionmenu = gtk_combo_box_new_text();
+	optionmenu = gtk_combo_box_text_new();
 
 	gtk_box_pack_start(GTK_BOX(box), optionmenu, FALSE, FALSE, 4);
 
