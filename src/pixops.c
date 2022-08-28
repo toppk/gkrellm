@@ -74,8 +74,8 @@ gkrellm_clone_pixmap(GdkPixmap **dest, GdkPixmap **src)
 			gkrellm_free_pixmap(dest);
 		}
 	if (!*dest)
-		*dest = gdk_pixmap_new(gkrellm_get_top_window()->window,
-					w_src, h_src, -1);
+		*dest = gdk_pixmap_new(gtk_widget_get_window(gkrellm_get_top_window()),
+							   w_src, h_src, -1);
 	gdk_draw_drawable(*dest, _GK.draw1_GC, *src, 0, 0, 0, 0, w_src, h_src);
 	return TRUE;	
 	}
@@ -100,8 +100,8 @@ gkrellm_clone_bitmap(GdkBitmap **dest, GdkBitmap **src)
 			gkrellm_free_bitmap(dest);
 		}
 	if (!*dest)
-		*dest = gdk_pixmap_new(gkrellm_get_top_window()->window,
-					w_src, h_src, 1);
+		*dest = gdk_pixmap_new(gtk_widget_get_window(gkrellm_get_top_window()),
+							   w_src, h_src, 1);
 	gdk_draw_drawable(*dest, _GK.bit1_GC, *src, 0, 0, 0, 0, w_src, h_src);
 	return TRUE;	
 	}
@@ -123,37 +123,37 @@ gboolean
 gkrellm_scale_pixbuf_to_pixmap(GdkPixbuf *src_pixbuf, GdkPixmap **pixmap,
 			GdkBitmap **mask, gint w_dst, gint h_dst)
 	{
-	GdkWindow		*window = gkrellm_get_top_window()->window;
-	GdkPixbuf		*dst_pixbuf;
-	gint			w_src, h_src;
-	gboolean		has_alpha;
-	GdkInterpType	interp_type;
+		GdkWindow *window = gtk_widget_get_window(gkrellm_get_top_window());
+		GdkPixbuf *dst_pixbuf;
+		gint w_src, h_src;
+		gboolean has_alpha;
+		GdkInterpType interp_type;
 
-	gkrellm_free_pixmap(pixmap);
-	gkrellm_free_bitmap(mask);
+		gkrellm_free_pixmap(pixmap);
+		gkrellm_free_bitmap(mask);
 
-	if (!src_pixbuf || !pixmap)
-		return FALSE;
+		if (!src_pixbuf || !pixmap)
+			return FALSE;
 
-	has_alpha = gdk_pixbuf_get_has_alpha(src_pixbuf);
-	w_src = gdk_pixbuf_get_width(src_pixbuf);
-	h_src = gdk_pixbuf_get_height(src_pixbuf);
+		has_alpha = gdk_pixbuf_get_has_alpha(src_pixbuf);
+		w_src = gdk_pixbuf_get_width(src_pixbuf);
+		h_src = gdk_pixbuf_get_height(src_pixbuf);
 
-	if (w_dst == 0)
-		w_dst = w_src;
-	else if (w_dst < 0 && (w_dst = w_src * _GK.theme_scale / 100) <= 0)
-		w_dst = 1;
+		if (w_dst == 0)
+			w_dst = w_src;
+		else if (w_dst < 0 && (w_dst = w_src * _GK.theme_scale / 100) <= 0)
+			w_dst = 1;
 
-	if (h_dst == 0)
-		h_dst = h_src;
-	else if (h_dst < 0 && (h_dst = h_src * _GK.theme_scale / 100) <= 0)
-		h_dst = 1;
+		if (h_dst == 0)
+			h_dst = h_src;
+		else if (h_dst < 0 && (h_dst = h_src * _GK.theme_scale / 100) <= 0)
+			h_dst = 1;
 
-	*pixmap = gdk_pixmap_new(window, w_dst, h_dst, -1);
-	if (mask && has_alpha)
-		*mask = gdk_pixmap_new(window, w_dst, h_dst, 1);
+		*pixmap = gdk_pixmap_new(window, w_dst, h_dst, -1);
+		if (mask && has_alpha)
+			*mask = gdk_pixmap_new(window, w_dst, h_dst, 1);
 
-	if (w_dst == w_src && h_dst == h_src)
+		if (w_dst == w_src && h_dst == h_src)
 		{
 		_render_to_pixmap(src_pixbuf, pixmap, mask, 0, 0, 0, 0, w_dst, h_dst);
 		return TRUE;
@@ -331,40 +331,40 @@ gboolean
 gkrellm_scale_piximage_to_pixmap(GkrellmPiximage *piximage, GdkPixmap **pixmap,
 			GdkBitmap **mask, gint w_dst, gint h_dst)
 	{
-	GdkWindow		*window = gkrellm_get_top_window()->window;
-	GdkPixbuf		*src_pixbuf, *dst_pixbuf;
-	gint			w_src, h_src;
-	gboolean		has_alpha;
+		GdkWindow *window = gtk_widget_get_window(gkrellm_get_top_window());
+		GdkPixbuf *src_pixbuf, *dst_pixbuf;
+		gint w_src, h_src;
+		gboolean has_alpha;
 
-	/* I want the pixmap freed even if there is no image to render back
-	|  in.  Eg. theme switch to one with no data_in/out_piximage.
-	*/
-	gkrellm_free_pixmap(pixmap);
-	gkrellm_free_bitmap(mask);
+		/* I want the pixmap freed even if there is no image to render back
+		|  in.  Eg. theme switch to one with no data_in/out_piximage.
+		*/
+		gkrellm_free_pixmap(pixmap);
+		gkrellm_free_bitmap(mask);
 
-	if (!piximage || !piximage->pixbuf || !pixmap)
-		return FALSE;
+		if (!piximage || !piximage->pixbuf || !pixmap)
+			return FALSE;
 
-	src_pixbuf = piximage->pixbuf;
-	has_alpha = gdk_pixbuf_get_has_alpha(src_pixbuf);
-	w_src = gdk_pixbuf_get_width(src_pixbuf);
-	h_src = gdk_pixbuf_get_height(src_pixbuf);
+		src_pixbuf = piximage->pixbuf;
+		has_alpha = gdk_pixbuf_get_has_alpha(src_pixbuf);
+		w_src = gdk_pixbuf_get_width(src_pixbuf);
+		h_src = gdk_pixbuf_get_height(src_pixbuf);
 
-	if (w_dst == 0)
-		w_dst = w_src;
-	else if (w_dst < 0 && (w_dst = w_src * _GK.theme_scale / 100) <= 0)
-		w_dst = 1;
+		if (w_dst == 0)
+			w_dst = w_src;
+		else if (w_dst < 0 && (w_dst = w_src * _GK.theme_scale / 100) <= 0)
+			w_dst = 1;
 
-	if (h_dst == 0)
-		h_dst = h_src;
-	else if (h_dst < 0 && (h_dst = h_src * _GK.theme_scale / 100) <= 0)
-		h_dst = 1;
+		if (h_dst == 0)
+			h_dst = h_src;
+		else if (h_dst < 0 && (h_dst = h_src * _GK.theme_scale / 100) <= 0)
+			h_dst = 1;
 
-	*pixmap = gdk_pixmap_new(window, w_dst, h_dst, -1);
-	if (mask && has_alpha)
-		*mask = gdk_pixmap_new(window, w_dst, h_dst, 1);
+		*pixmap = gdk_pixmap_new(window, w_dst, h_dst, -1);
+		if (mask && has_alpha)
+			*mask = gdk_pixmap_new(window, w_dst, h_dst, 1);
 
-	if (w_dst == w_src && h_dst == h_src)
+		if (w_dst == w_src && h_dst == h_src)
 		{
 		_render_to_pixmap(src_pixbuf, pixmap, mask, 0, 0, 0, 0, w_dst, h_dst);
 		return TRUE;
@@ -436,59 +436,59 @@ gboolean
 gkrellm_scale_theme_background(GkrellmPiximage *piximage, GdkPixmap **pixmap,
 			GdkBitmap **mask, gint w_dst, gint h_dst)
 	{
-	GdkWindow		*window = gkrellm_get_top_window()->window;
-	GdkPixbuf		*src_pixbuf, *sub_pixbuf, *pixbuf;
-	GdkInterpType	interp_type;
-	GkrellmBorder	bdr;
-	gint			w_src, h_src, l, r, t, b;
-	gint			hs, hd, ws, wd;
-	gboolean		has_alpha;
+		GdkWindow *window = gtk_widget_get_window(gkrellm_get_top_window());
+		GdkPixbuf *src_pixbuf, *sub_pixbuf, *pixbuf;
+		GdkInterpType interp_type;
+		GkrellmBorder bdr;
+		gint w_src, h_src, l, r, t, b;
+		gint hs, hd, ws, wd;
+		gboolean has_alpha;
 
-	if (_GK.theme_scale == 100)
-		return gkrellm_scale_piximage_to_pixmap(piximage, pixmap, mask,
-					w_dst, h_dst);
+		if (_GK.theme_scale == 100)
+			return gkrellm_scale_piximage_to_pixmap(piximage, pixmap, mask,
+													w_dst, h_dst);
 
-	/* I want the pixmap freed even if there is no image to render back
-	|  in.  Eg. theme switch to one with no data_in/out_piximage.
-	*/
-	gkrellm_free_pixmap(pixmap);
-	gkrellm_free_bitmap(mask);
+		/* I want the pixmap freed even if there is no image to render back
+		|  in.  Eg. theme switch to one with no data_in/out_piximage.
+		*/
+		gkrellm_free_pixmap(pixmap);
+		gkrellm_free_bitmap(mask);
 
-	if (!piximage || !piximage->pixbuf || !pixmap)
-		return FALSE;
+		if (!piximage || !piximage->pixbuf || !pixmap)
+			return FALSE;
 
-	src_pixbuf = piximage->pixbuf;
-	has_alpha = gdk_pixbuf_get_has_alpha(src_pixbuf);
-	w_src = gdk_pixbuf_get_width(src_pixbuf);
-	h_src = gdk_pixbuf_get_height(src_pixbuf);
+		src_pixbuf = piximage->pixbuf;
+		has_alpha = gdk_pixbuf_get_has_alpha(src_pixbuf);
+		w_src = gdk_pixbuf_get_width(src_pixbuf);
+		h_src = gdk_pixbuf_get_height(src_pixbuf);
 
-	if (w_dst == 0)
-		w_dst = w_src;
+		if (w_dst == 0)
+			w_dst = w_src;
 
-	if (h_dst == 0)
-		h_dst = h_src;
+		if (h_dst == 0)
+			h_dst = h_src;
 
-	*pixmap = gdk_pixmap_new(window, w_dst, h_dst, -1);
-	if (mask && has_alpha)
-		*mask = gdk_pixmap_new(window, w_dst, h_dst, 1);
+		*pixmap = gdk_pixmap_new(window, w_dst, h_dst, -1);
+		if (mask && has_alpha)
+			*mask = gdk_pixmap_new(window, w_dst, h_dst, 1);
 
-	bdr = piximage->border;
-	if (bdr.left + bdr.right >= w_src)
-		fix_border_overlap(&bdr.left, &bdr.right, w_src);
-	if (bdr.top + bdr.bottom >= h_src)
-		fix_border_overlap(&bdr.top, &bdr.bottom, h_src);
-	l = bdr.left * _GK.theme_scale / 100;
-	r = bdr.right * _GK.theme_scale / 100;
-	t = bdr.top * _GK.theme_scale / 100;
-	b = bdr.bottom * _GK.theme_scale / 100;
-	if (l + r >= w_dst)
-		fix_border_overlap(&l, &r, w_dst);
-	if (t + b >= h_dst)
-		fix_border_overlap(&t, &b, h_dst);
+		bdr = piximage->border;
+		if (bdr.left + bdr.right >= w_src)
+			fix_border_overlap(&bdr.left, &bdr.right, w_src);
+		if (bdr.top + bdr.bottom >= h_src)
+			fix_border_overlap(&bdr.top, &bdr.bottom, h_src);
+		l = bdr.left * _GK.theme_scale / 100;
+		r = bdr.right * _GK.theme_scale / 100;
+		t = bdr.top * _GK.theme_scale / 100;
+		b = bdr.bottom * _GK.theme_scale / 100;
+		if (l + r >= w_dst)
+			fix_border_overlap(&l, &r, w_dst);
+		if (t + b >= h_dst)
+			fix_border_overlap(&t, &b, h_dst);
 
-	interp_type = GDK_INTERP_BILINEAR;
+		interp_type = GDK_INTERP_BILINEAR;
 
-	if (l > 0 && t > 0)		/* top left corner */
+		if (l > 0 && t > 0) /* top left corner */
 		{
 		sub_pixbuf = gdk_pixbuf_new_subpixbuf(src_pixbuf, 0, 0,
 					bdr.left, bdr.top);

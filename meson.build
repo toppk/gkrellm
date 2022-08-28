@@ -19,6 +19,13 @@ else
    extra_args = []
 endif
 
+if 1 == 0
+   extra_args += ['-DGDK_DISABLE_DEPRECATED', '-DGTK_DISABLE_DEPRECATED' ]
+endif
+if 1 == 1
+   extra_args += ['-DGSEAL_ENABLE']
+endif
+
 src = ['src/alerts.c', 'src/base64.c', 'src/battery.c', 'src/chart.c', 'src/client.c',
        'src/clock.c', 'src/config.c', 'src/cpu.c', 'src/deprecated.c', 'src/disk.c',
        'src/fs.c', 'src/gui.c', 'src/hostname.c', 'src/inet.c', 'src/krell.c', 'src/mail.c',

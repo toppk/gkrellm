@@ -64,8 +64,8 @@ gkrellm_message_dialog(gchar *title, gchar *message)
 
 	vbox = gtk_vbox_new(FALSE, 0);
 	gtk_container_set_border_width(GTK_CONTAINER(vbox), 8);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), vbox,
-				FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), vbox,
+					   FALSE, FALSE, 0);
 
 	label = gtk_label_new(message);
 	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
@@ -104,9 +104,8 @@ gkrellm_config_message_dialog(gchar *title, gchar *message)
 				"Gkrellm_dialog", "Gkrellm");
 	vbox = gtk_vbox_new(FALSE, 0);
 	gtk_container_set_border_width(GTK_CONTAINER(vbox), 8);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), vbox,
-				FALSE, FALSE, 0);
-
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), vbox,
+					   FALSE, FALSE, 0);
 	label = gtk_label_new(message);
 	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
 
@@ -872,11 +871,11 @@ cb_HZ_spin(GtkWidget *widget, GtkSpinButton *spin)
 static void
 cb_hostname_sysname(GtkWidget *widget, gpointer data)
 	{
-	_GK.enable_hostname = GTK_TOGGLE_BUTTON(enable_hst_button)->active;
-	if (hostname_short_button)
-		_GK.hostname_short = GTK_TOGGLE_BUTTON(hostname_short_button)->active;
-	_GK.enable_system_name = GTK_TOGGLE_BUTTON(enable_sysname_button)->active;
-	gkrellm_apply_hostname_config();
+		_GK.enable_hostname = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(enable_hst_button));
+		if (hostname_short_button)
+			_GK.hostname_short = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(hostname_short_button));
+		_GK.enable_system_name = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(enable_sysname_button));
+		gkrellm_apply_hostname_config();
 	}
 
 static void
@@ -889,15 +888,15 @@ cb_general(void)
 
 	if (allow_multiple_button)
 		_GK.allow_multiple_instances =
-					GTK_TOGGLE_BUTTON(allow_multiple_button)->active;
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(allow_multiple_button));
 	if (on_top_button)
-		_GK.on_top = GTK_TOGGLE_BUTTON(on_top_button)->active;
+		_GK.on_top = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(on_top_button));
 
-	_GK.save_position = GTK_TOGGLE_BUTTON(save_position_button)->active;
+	_GK.save_position = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(save_position_button));
 #if !defined(WIN32)
 	if (sticky_state_button)
 		{
-		n = GTK_TOGGLE_BUTTON(sticky_state_button)->active;
+		n = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(sticky_state_button));
 		new_state = (n != _GK.sticky_state);
 		_GK.sticky_state = n;
 		if (new_state)
@@ -912,11 +911,11 @@ cb_general(void)
 		}
 
 	if (decorated_button)	/* restart for change to take effect */
-		_GK.decorated = GTK_TOGGLE_BUTTON(decorated_button)->active;
+		_GK.decorated = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(decorated_button));
 
 	if (skip_taskbar_button)
 		{
-		n = GTK_TOGGLE_BUTTON(skip_taskbar_button)->active;
+		n = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(skip_taskbar_button));
 		new_state = (n != _GK.state_skip_taskbar);
 		_GK.state_skip_taskbar = n;
 		if (new_state)
@@ -924,7 +923,7 @@ cb_general(void)
 		}
 	if (skip_pager_button)
 		{
-		n = GTK_TOGGLE_BUTTON(skip_pager_button)->active;
+		n = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(skip_pager_button));
 		new_state = (n != _GK.state_skip_pager);
 		_GK.state_skip_pager = n;
 		if (new_state)
@@ -932,7 +931,7 @@ cb_general(void)
 		}
 	if (above_button)
 		{
-		n = GTK_TOGGLE_BUTTON(above_button)->active;
+		n = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(above_button));
 		new_state = (n != _GK.state_above);
 		_GK.state_above = n;
 		if (new_state)
@@ -945,7 +944,7 @@ cb_general(void)
 		}
 	if (below_button)
 		{
-		n = GTK_TOGGLE_BUTTON(below_button)->active;
+		n = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(below_button));
 		new_state = (n != _GK.state_below);
 		_GK.state_below = n;
 		if (new_state)
@@ -965,7 +964,7 @@ cb_dock_type(GtkWidget *widget, gpointer data)
 	{
 	gboolean	sensitive;
 
-	_GK.dock_type = GTK_TOGGLE_BUTTON(dock_type_button)->active;
+	_GK.dock_type = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dock_type_button));
 	sensitive = !_GK.dock_type;
 	if (!sensitive)
 		{
@@ -1289,10 +1288,10 @@ cb_font_dialog(GtkWidget *widget, AltFontSelect *afs)
 	fsd = GTK_FONT_SELECTION_DIALOG(w);
 	afs->fontseldlg = fsd;
 	gtk_font_selection_dialog_set_font_name(fsd, afs->string);
-	g_signal_connect(G_OBJECT(fsd->ok_button), "clicked",
-			G_CALLBACK(cb_font_dialog_ok), afs);
-	g_signal_connect_swapped(G_OBJECT(fsd->cancel_button), "clicked",
-			G_CALLBACK(gtk_widget_destroy), fsd);
+	g_signal_connect(G_OBJECT(gtk_font_selection_dialog_get_ok_button(fsd)), "clicked",
+					 G_CALLBACK(cb_font_dialog_ok), afs);
+	g_signal_connect_swapped(G_OBJECT(gtk_font_selection_dialog_get_cancel_button(fsd)), "clicked",
+							 G_CALLBACK(gtk_widget_destroy), fsd);
 	g_signal_connect(G_OBJECT(fsd), "destroy",
 			G_CALLBACK(gtk_widget_destroyed), &afs->fontseldlg);
 	gtk_widget_show(GTK_WIDGET(fsd));
@@ -1822,8 +1821,8 @@ gkrellm_get_theme_scale(void)
 static void
 cb_track_gtk(GtkToggleButton *button, GtkWidget *box)
 	{
-	_GK.track_gtk_theme_name = button->active;
-	gtk_widget_set_sensitive(box, _GK.track_gtk_theme_name);
+		_GK.track_gtk_theme_name = gtk_toggle_button_get_active(button);
+		gtk_widget_set_sensitive(box, _GK.track_gtk_theme_name);
 	}
 
 static void
@@ -2098,7 +2097,7 @@ create_config_page(GkrellmMonitor *mon, GtkTreeStore *tree, GtkTreeIter *iter,
 
 	vbox = gtk_vbox_new(FALSE, 0);
 	gtk_notebook_append_page(notebook, vbox, NULL);
-	page = g_list_length(notebook->children) - 1;
+	page = g_list_length(gtk_container_get_children(notebook)) - 1;
 
 	if (mon)
 		mon->privat->config_page = page;
@@ -2410,19 +2409,19 @@ create_config_window(void)
 	gtk_box_pack_start(GTK_BOX(main_vbox), hbox, FALSE, FALSE, 0);
 
 	apply_button = gtk_button_new_from_stock(GTK_STOCK_APPLY);
-	GTK_WIDGET_SET_FLAGS(apply_button, GTK_CAN_DEFAULT);
+	gtk_widget_set_can_default(apply_button, TRUE);
 	g_signal_connect(G_OBJECT(apply_button), "clicked",
 				G_CALLBACK(apply_config), NULL);
 	gtk_box_pack_start(GTK_BOX(hbox), apply_button, TRUE, TRUE, 0);
 
 	close_button = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
-	GTK_WIDGET_SET_FLAGS(close_button, GTK_CAN_DEFAULT);
+	gtk_widget_set_can_default(close_button, TRUE);
 	g_signal_connect(G_OBJECT(close_button), "clicked",
 				G_CALLBACK(close_config), GINT_TO_POINTER(1));
 	gtk_box_pack_start(GTK_BOX(hbox), close_button, TRUE, TRUE, 0);
 
 	button = gtk_button_new_from_stock(GTK_STOCK_OK);
-	GTK_WIDGET_SET_FLAGS(button, GTK_CAN_DEFAULT);
+	gtk_widget_set_can_default(button, TRUE);
 	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(OK_config), NULL);
 	gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
 	gtk_widget_grab_default(button);

@@ -309,7 +309,7 @@ proc_expose_event(GtkWidget *widget, GdkEventExpose *ev)
 			pixmap = cp->panel->pixmap;
 		}
 	if (pixmap)
-		gdk_draw_drawable(widget->window, gkrellm_draw_GC(1), pixmap,
+		gdk_draw_drawable(gtk_widget_get_window(widget), gkrellm_draw_GC(1), pixmap,
 				  ev->area.x, ev->area.y, ev->area.x, ev->area.y,
 				  ev->area.width, ev->area.height);
 	return FALSE;
@@ -806,7 +806,7 @@ gkrellm_proc_set_sensor(gpointer sr, gint type)
 static void
 cb_sensor_separate(GtkWidget *button, gpointer data)
 	{
-	sensor_separate_mode = GTK_TOGGLE_BUTTON(button)->active;
+	sensor_separate_mode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 	fix_panel();
 	}
 
@@ -828,7 +828,7 @@ cb_enable(GtkWidget *button, gpointer data)
     {
 	gboolean enabled;
 
-	enabled = GTK_TOGGLE_BUTTON(button)->active;
+	enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 	if (enabled && ! proc.enabled)
 		{
 		create_proc_monitor(proc.vbox, TRUE);

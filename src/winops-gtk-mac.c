@@ -93,25 +93,25 @@ gkrellm_winop_reset(void)
 void
 gkrellm_winop_state_skip_taskbar(gboolean state)
 	{
-	gdk_window_set_skip_taskbar_hint(gkrellm_get_top_window()->window, state);
+	gdk_window_set_skip_taskbar_hint(gtk_widget_get_window(gkrellm_get_top_window()), state);
 	}
 
 void
 gkrellm_winop_state_skip_pager(gboolean state)
 	{
-	gdk_window_set_skip_pager_hint(gkrellm_get_top_window()->window, state);
+	gdk_window_set_skip_pager_hint(gtk_widget_get_window(gkrellm_get_top_window()), state);
 	}
 
 void
 gkrellm_winop_state_above(gboolean state)
 	{
-	gdk_window_set_keep_above(gkrellm_get_top_window()->window, state);
+	gdk_window_set_keep_above(gtk_widget_get_window(gkrellm_get_top_window()), state);
 	}
 
 void
 gkrellm_winop_state_below(gboolean state)
 	{
-	gdk_window_set_keep_below(gkrellm_get_top_window()->window, state);
+	gdk_window_set_keep_below(gtk_widget_get_window(gkrellm_get_top_window()), state);
 	}
 
 void
@@ -159,7 +159,7 @@ gkrellm_winop_place_gkrellm(gchar *geom)
 		y = _GK.h_display - h_gkrell + y;
 	if (place & XNegative)
 		x = _GK.w_display - w_gkrell + x;
-	gdk_window_move(gkrellm_get_top_window()->window, x, y);
+	gdk_window_move(gtk_widget_get_window(gkrellm_get_top_window()), x, y);
 	_GK.y_position = y;
 	_GK.x_position = x;
 	_GK.position_valid = TRUE;

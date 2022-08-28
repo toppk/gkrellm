@@ -79,7 +79,7 @@ uptime_expose_event(GtkWidget *widget, GdkEventExpose *ev)
 	{
 	if (widget == uptime->drawing_area)
 		{
-		gdk_draw_drawable(widget->window, gkrellm_draw_GC(1), uptime->pixmap,
+		gdk_draw_drawable(gtk_widget_get_window(widget), gkrellm_draw_GC(1), uptime->pixmap,
 				ev->area.x, ev->area.y, ev->area.x, ev->area.y,
 				ev->area.width, ev->area.height);
 		}
@@ -240,7 +240,7 @@ static GtkWidget	*launch_entry,
 static void
 cb_enable(GtkWidget *widget, gpointer data)
 	{
-	uptime_enabled = GTK_TOGGLE_BUTTON(uptime_enabled_button)->active;
+	uptime_enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(uptime_enabled_button));
 	if (uptime_enabled)
 		{
 		gkrellm_panel_show(uptime);

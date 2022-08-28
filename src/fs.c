@@ -918,11 +918,11 @@ fs_expose_event(GtkWidget *widget, GdkEventExpose *ev)
 		fs = (FSmon *) list->data;
 		if (widget == fs->panel->drawing_area)
 			{
-			gdk_draw_drawable(widget->window, gkrellm_draw_GC(1),
-					fs->panel->pixmap,
-					ev->area.x, ev->area.y, ev->area.x, ev->area.y,
-					ev->area.width, ev->area.height);
-			break;
+				gdk_draw_drawable(gtk_widget_get_window(widget), gkrellm_draw_GC(1),
+								  fs->panel->pixmap,
+								  ev->area.x, ev->area.y, ev->area.x, ev->area.y,
+								  ev->area.width, ev->area.height);
+				break;
 			}
 		}
 	return FALSE;
@@ -1707,8 +1707,8 @@ cb_combo_changed(GtkComboBox *widget, gpointer user_data)
 	if (m && (fstab_user_permission(m) || uid == 0))
 		{
 		gtk_widget_set_sensitive(mounting_button, TRUE);
-		if (GTK_TOGGLE_BUTTON(mounting_button)->active)
-			{
+		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mounting_button)))
+		{
 			gtk_entry_set_text(GTK_ENTRY(mount_entry), "");
 			gtk_entry_set_text(GTK_ENTRY(umount_entry), "");
 			gtk_widget_set_sensitive(mount_entry, FALSE);
@@ -1717,10 +1717,9 @@ cb_combo_changed(GtkComboBox *widget, gpointer user_data)
 		}
 	else
 		{
-		if (GTK_TOGGLE_BUTTON(mounting_button)->active)
-			gtk_toggle_button_set_active(
-						GTK_TOGGLE_BUTTON(mounting_button), FALSE);
-		else
+			if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mounting_button)))
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mounting_button), FALSE);
+			else
 			{
 			gtk_widget_set_sensitive(mount_entry, TRUE);
 			gtk_widget_set_sensitive(umount_entry, TRUE);
@@ -1734,8 +1733,8 @@ cb_mount_button_clicked(GtkWidget *widget)
 	{
 	if (!mounting_supported || _GK.client_mode)
 		return;
-	if (GTK_TOGGLE_BUTTON(mounting_button)->active)
-		{
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mounting_button)))
+	{
 		gtk_entry_set_text(GTK_ENTRY(mount_entry), "");
 		gtk_entry_set_text(GTK_ENTRY(umount_entry), "");
 		gtk_widget_set_sensitive(mount_entry, FALSE);
@@ -1750,9 +1749,7 @@ cb_mount_button_clicked(GtkWidget *widget)
 		{
 		gtk_widget_set_sensitive(mount_entry, TRUE);
 		gtk_widget_set_sensitive(umount_entry, TRUE);
-		if (   ejectable_button
-			&& GTK_TOGGLE_BUTTON(ejectable_button)->active
-		   )
+		if (ejectable_button && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ejectable_button)))
 			gtk_widget_set_sensitive(device_entry, TRUE);
 		}
 	}
@@ -1764,9 +1761,9 @@ cb_ejectable_button_clicked(GtkWidget *widget)
 
 	if (!mounting_supported || _GK.client_mode)
 		return;
-	fstab_mounting = GTK_TOGGLE_BUTTON(mounting_button)->active;
-	if (GTK_TOGGLE_BUTTON(ejectable_button)->active)
-		{
+	fstab_mounting = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mounting_button));
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ejectable_button)))
+	{
 		gtk_widget_set_sensitive(device_entry, !fstab_mounting);
 		}
 	else
@@ -1781,11 +1778,11 @@ cb_secondary_button_clicked(GtkWidget *widget)
 	{
 	if (!mounting_supported)	/* Show button is in client mode */
 		return;
-	if (GTK_TOGGLE_BUTTON(secondary_button)->active)
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(secondary_button)))
 		gtk_widget_set_sensitive(show_button, TRUE);
 	else
 		{
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(show_button), FALSE);
+		gtk_toggle_button_set_active(show_button, FALSE);
 		gtk_widget_set_sensitive(show_button, FALSE);
 		}
 	}
@@ -1802,8 +1799,7 @@ reset_entries(gboolean level0)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(show_button), FALSE);
 	if (ejectable_button)
 		{
-		gtk_toggle_button_set_active(
-					GTK_TOGGLE_BUTTON(ejectable_button), FALSE);
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ejectable_button), FALSE);
 		if (device_entry)
 			gtk_entry_set_text(GTK_ENTRY(device_entry), "");
 		}
@@ -2015,9 +2011,9 @@ add_cb(GtkWidget *widget)
 	fs->mount.directory = g_strdup(gkrellm_gtk_entry_get_text(&entry));
 
 	if (show_button)
-		fs->show_if_mounted = GTK_TOGGLE_BUTTON(show_button)->active;
+		fs->show_if_mounted = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(show_button));
 	if (mounting_button)
-		fs->fstab_mounting = GTK_TOGGLE_BUTTON(mounting_button)->active;
+		fs->fstab_mounting = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mounting_button));
 	if (mount_entry)
 		{
 		gkrellm_dup_string(&(fs->launch_mount.command),
@@ -2027,10 +2023,10 @@ add_cb(GtkWidget *widget)
 		}
 	if (ejectable_button)
 		{
-		fs->ejectable = GTK_TOGGLE_BUTTON(ejectable_button)->active;
-		if (fs->ejectable && !fs->fstab_mounting && device_entry)
-			gkrellm_dup_string(&(fs->eject_device),
-					gkrellm_gtk_entry_get_text(&device_entry));
+			fs->ejectable = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ejectable_button));
+			if (fs->ejectable && !fs->fstab_mounting && device_entry)
+				gkrellm_dup_string(&(fs->eject_device),
+								   gkrellm_gtk_entry_get_text(&device_entry));
 		}
 	if (!*(fs->label) || !*(fs->mount.directory))
 		{
@@ -2066,7 +2062,7 @@ add_cb(GtkWidget *widget)
 		}
 
 	model = gtk_tree_view_get_model(treeview);
-	secondary = GTK_TOGGLE_BUTTON(secondary_button)->active;
+	secondary = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(secondary_button));
 	if (row_reference)
 		{
 		path = gtk_tree_row_reference_get_path(row_reference);
@@ -2183,13 +2179,13 @@ cb_data_format(GtkWidget *widget, gpointer data)
 static void
 cb_auto_eject(GtkWidget *button, gpointer data)
 	{
-	cdrom_auto_eject = GTK_TOGGLE_BUTTON(button)->active;
+		cdrom_auto_eject = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 	}
 
 static void
 cb_binary_units(GtkWidget *button, gpointer data)
 	{
-	binary_units = GTK_TOGGLE_BUTTON(button)->active;
+		binary_units = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 	}
 
 static void
@@ -2375,7 +2371,7 @@ create_fs_panels_page(GtkWidget *vbox)
 
 	gkrellm_gtk_button_connected(vbox1, &new_apply_button, FALSE, FALSE, 4,
 			add_cb, NULL, GTK_STOCK_NEW);
-	GTK_WIDGET_SET_FLAGS(new_apply_button, GTK_CAN_DEFAULT);
+	gtk_widget_set_can_default(new_apply_button, TRUE);
 	gtk_widget_grab_default(new_apply_button);
 
 	gkrellm_gtk_button_connected(vbox1, &delete_button, FALSE, FALSE, 4,

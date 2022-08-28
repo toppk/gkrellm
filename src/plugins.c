@@ -1369,7 +1369,7 @@ apply_place(void)
 	if (!place_plugin || setting_place_buttons)
 		return;
 	for (i = 0; i < N_BUILTIN_MONITORS; ++i)
-		if (GTK_TOGGLE_BUTTON(builtin_button[i])->active)
+		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(builtin_button[i])))
 			break;
 	for (list = gkrellm_monitor_list; list; list = list->next)
 		{
@@ -1378,7 +1378,7 @@ apply_place(void)
 			continue;
 		place_plugin->privat->insert_before_id = mon->id;
 		place_plugin->privat->insert_after =
-				GTK_TOGGLE_BUTTON(after_button)->active;
+				gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(after_button));
 		if (place_plugin->privat->insert_after)
 			place_plugin->privat->gravity = 0;
 		else
@@ -1473,7 +1473,7 @@ place_button_sensitivity(GkrellmMonitor *plugin, gboolean state)
 static gboolean
 cb_place(GtkToggleButton *button, gpointer data)
 	{
-	if (!button->active)
+	if (!gtk_toggle_button_get_active(button))
 		return FALSE;
 	apply_place();
 	return TRUE;
@@ -1586,7 +1586,7 @@ cb_place_button(GtkWidget *widget, gpointer data)
 		gtk_box_pack_end(GTK_BOX(vbox1), hbox, FALSE, FALSE, 0);
 
 		button = gtk_button_new_from_stock(GTK_STOCK_OK);
-		GTK_WIDGET_SET_FLAGS(button, GTK_CAN_DEFAULT);
+		gtk_widget_set_can_default(button, TRUE);
 		g_signal_connect(G_OBJECT(button), "clicked",
 				G_CALLBACK(cb_close_place), NULL);
 		gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
@@ -1595,7 +1595,7 @@ cb_place_button(GtkWidget *widget, gpointer data)
 		}
 	else
 		gtk_window_present(GTK_WINDOW(place_plugin_window));
-//		gdk_window_raise(place_plugin_window->window);
+	//		gdk_window_raise(gtk_widget_get_window(place_plugin_window));
 
 	if (row_reference)
 		{

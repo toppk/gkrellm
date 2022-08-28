@@ -962,7 +962,7 @@ alert_units_percent_cb(GtkToggleButton *button, gpointer data)
 	GList	*list;
 	Battery	*bat;
 
-	alert_units_percent = button->active;
+	alert_units_percent = gtk_toggle_button_get_active(button);
 
 	if (bat_alert)
 		{
@@ -986,7 +986,7 @@ cb_enable_estimate(GtkToggleButton *button, GtkWidget *box)
 	Battery		*bat;
 	gboolean	enable;
 
-	enable = button->active;
+	enable = gtk_toggle_button_get_active(button);
 	gtk_widget_set_sensitive(box, enable);
 
 	if (enable_estimate != enable)
@@ -1035,11 +1035,11 @@ cb_enable(GtkToggleButton *button, gpointer data)
 	gint	which  = GPOINTER_TO_INT(data);
 
 	if (which == 0)
-		enable_composite = enable_each = button->active;
+		enable_composite = enable_each = gtk_toggle_button_get_active(button);
 	else if (which == 1)
-		enable_each = button->active;
+		enable_each = gtk_toggle_button_get_active(button);
 	else if (which == 2)
-		enable_composite = button->active;
+		enable_composite = gtk_toggle_button_get_active(button);
 
 	for (list = battery_list; list; list = list->next)
 		{
@@ -1090,8 +1090,8 @@ cb_estimate_model(GtkWidget *entry, gpointer data)
 	{
 	gint	i = GPOINTER_TO_INT(data);
 
-	estimate_model[i] = 
-			GTK_TOGGLE_BUTTON(estimate_model_button[i])->active;
+	estimate_model[i] =
+		gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(estimate_model_button[i]));
 	reset_estimate = TRUE;
 	update_battery_panels();
 	}

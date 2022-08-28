@@ -297,9 +297,9 @@ draw_panel(GkrellmPanel *p, gint to_screen)
 	gdk_draw_drawable(p->bg_text_layer_pixmap, _GK.draw1_GC, p->bg_pixmap,
 					0, 0, 0, 0, p->w, p->h);
 
-	if (p->drawing_area->window && to_screen)
+	if (gtk_widget_get_window(p->drawing_area) && to_screen)
 		{
-		gdk_draw_drawable(p->drawing_area->window, _GK.draw1_GC, p->pixmap,
+		gdk_draw_drawable(gtk_widget_get_window(p->drawing_area), _GK.draw1_GC, p->pixmap,
 					0, 0, 0, 0, p->w, p->h);
 		gkrellm_draw_panel_layers_force(p);
 		}
@@ -384,7 +384,7 @@ gkrellm_panel_keep_lists(GkrellmPanel *p, gboolean keep)
 static gboolean
 cb_panel_map_event(GtkWidget *widget, GdkEvent *event, GkrellmPanel *p)
 	{
-	gdk_window_get_position(p->drawing_area->window, NULL, &p->y_mapped);
+	gdk_window_get_position(gtk_widget_get_window(p->drawing_area), NULL, &p->y_mapped);
 	if (_GK.frame_left_panel_overlap > 0 || _GK.frame_right_panel_overlap > 0)
 		_GK.need_frame_packing = TRUE;
 	return FALSE;
@@ -394,7 +394,7 @@ cb_panel_map_event(GtkWidget *widget, GdkEvent *event, GkrellmPanel *p)
 static gboolean
 cb_panel_size_allocate(GtkWidget *widget, GtkAllocation *size, GkrellmPanel *p)
 	{
-	gdk_window_get_position(p->drawing_area->window, NULL, &p->y_mapped);
+	gdk_window_get_position(gtk_widget_get_window(p->drawing_area), NULL, &p->y_mapped);
 	if (_GK.frame_left_panel_overlap > 0 || _GK.frame_right_panel_overlap > 0)
 		_GK.need_frame_packing = TRUE;
 	return FALSE;
@@ -481,13 +481,13 @@ gkrellm_panel_create(GtkWidget *vbox, GkrellmMonitor *mon, GkrellmPanel *p)
 
 	if (p->bg_text_layer_pixmap)
 		g_object_unref(G_OBJECT(p->bg_text_layer_pixmap));
-	p->bg_text_layer_pixmap = gdk_pixmap_new(top_win->window, p->w, p->h, -1);
+	p->bg_text_layer_pixmap = gdk_pixmap_new(gtk_widget_get_window(top_win), p->w, p->h, -1);
 	if (p->bg_pixmap)
 		g_object_unref(G_OBJECT(p->bg_pixmap));
-	p->bg_pixmap = gdk_pixmap_new(top_win->window, p->w, p->h, -1);
+	p->bg_pixmap = gdk_pixmap_new(gtk_widget_get_window(top_win), p->w, p->h, -1);
 	if (p->pixmap)
 		g_object_unref(G_OBJECT(p->pixmap));
-	p->pixmap = gdk_pixmap_new(top_win->window, p->w, p->h, -1);
+	p->pixmap = gdk_pixmap_new(gtk_widget_get_window(top_win), p->w, p->h, -1);
 
 	if (p->shown)
 		{
@@ -947,8 +947,8 @@ gkrellm_draw_panel_layers(GkrellmPanel *p)
 		if (do_top_layer_decals)
 			push_decal_pixmaps(p, TRUE);
 
-		if (p->drawing_area->window)
-			gdk_draw_drawable(p->drawing_area->window, _GK.draw1_GC, p->pixmap,
+		if (gtk_widget_get_window(p->drawing_area))
+			gdk_draw_drawable(gtk_widget_get_window(p->drawing_area), _GK.draw1_GC, p->pixmap,
 						0, 0,   0, 0,   p->w, p->h);
 		}
 	p->modified = FALSE;

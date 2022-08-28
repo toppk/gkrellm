@@ -137,7 +137,7 @@ smc_connect(gint argc, gchar **argv)
 	if (!smc_connection)
 		return;
 
-	gdk_set_sm_client_id(client_id);
+	gdk_x11_set_sm_client_id(client_id);
 
 	/* Session manager properties - 4 are required.
 	*/
@@ -225,15 +225,15 @@ net_wm_state(gchar *hint, gboolean state)
 
 	xev.type = ClientMessage;
 	xev.xclient.type = ClientMessage;
-	xev.xclient.window = GDK_WINDOW_XWINDOW(gkrellm_get_top_window()->window);
+	xev.xclient.window = GDK_WINDOW_XWINDOW(gtk_widget_get_window(gkrellm_get_top_window()));
 	xev.xclient.message_type = gdk_x11_get_xatom_by_name("_NET_WM_STATE");
 	xev.xclient.format = 32;
 	xev.xclient.data.l[0] = state ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE;
 	xev.xclient.data.l[1] = gdk_x11_get_xatom_by_name(hint);
 	xev.xclient.data.l[2] = 0;
 
-	XSendEvent(GDK_DISPLAY(), GDK_ROOT_WINDOW(),
-				False, SubstructureNotifyMask|SubstructureRedirectMask, &xev);
+	XSendEvent(gdk_x11_display_get_xdisplay(gdk_display_get_default()), GDK_ROOT_WINDOW(),
+			   False, SubstructureNotifyMask | SubstructureRedirectMask, &xev);
 	}
 
 void
@@ -338,8 +338,8 @@ gkrellm_winop_update_struts(void)
 	if (!_GK.is_dock_type)
 		return;
 
-	display = GDK_WINDOW_XDISPLAY(gkrellm_get_top_window()->window);
-	window  = GDK_WINDOW_XWINDOW(gkrellm_get_top_window()->window);
+	display = GDK_WINDOW_XDISPLAY(gtk_widget_get_window(gkrellm_get_top_window()));
+	window  = GDK_WINDOW_XWINDOW(gtk_widget_get_window(gkrellm_get_top_window()));
 
 	if (net_wm_strut_partial == None)
 		{
@@ -394,8 +394,8 @@ gkrellm_winop_options(gint argc, gchar **argv)
 		exit(0);
 		}
 	smc_connect(argc, argv);
-	display = GDK_WINDOW_XDISPLAY(gkrellm_get_top_window()->window);
-	window  = GDK_WINDOW_XWINDOW(gkrellm_get_top_window()->window);
+	display = GDK_WINDOW_XDISPLAY(gtk_widget_get_window(gkrellm_get_top_window()));
+	window  = GDK_WINDOW_XWINDOW(gtk_widget_get_window(gkrellm_get_top_window()));
 
 	/* Set window type or list of states using standard EWMH hints.
 	|  See http://www.freedesktop.org/
@@ -448,8 +448,8 @@ gkrellm_winop_withdrawn(void)
 
 	if (!_GK.withdrawn)
 		return;
-	display = GDK_WINDOW_XDISPLAY(gkrellm_get_top_window()->window);
-	window  = GDK_WINDOW_XWINDOW(gkrellm_get_top_window()->window);
+	display = GDK_WINDOW_XDISPLAY(gtk_widget_get_window(gkrellm_get_top_window()));
+	window  = GDK_WINDOW_XWINDOW(gtk_widget_get_window(gkrellm_get_top_window()));
 
 	if (!_GK.is_dock_type)
 		{
@@ -483,7 +483,7 @@ gkrellm_winop_place_gkrellm(gchar *geom)
 		y = _GK.h_display - h_gkrell + y;
 	if (place & XNegative)
 		x = _GK.w_display - w_gkrell + x;
-	gdk_window_move(gkrellm_get_top_window()->window, x, y);
+	gdk_window_move(gtk_widget_get_window(gkrellm_get_top_window()), x, y);
 	_GK.y_position = y;
 	_GK.x_position = x;
 	_GK.position_valid = TRUE;
@@ -496,7 +496,7 @@ gkrellm_winop_flush_motion_events(void)
 	XEvent			xevent;
 
 	gdk_flush();
-	while (XCheckTypedEvent(GDK_DISPLAY(), MotionNotify, &xevent))
+	while (XCheckTypedEvent(gdk_x11_display_get_xdisplay(gdk_display_get_default()), MotionNotify, &xevent))
 		;
 	}
 
@@ -513,13 +513,13 @@ gkrellm_winop_updated_background(void)
   
 	if (!_GK.any_transparency)
 		return FALSE;
-	prop = XInternAtom(GDK_DISPLAY(), "_XROOTPMAP_ID", True);
+	prop = XInternAtom(gdk_x11_display_get_xdisplay(gdk_display_get_default()), "_XROOTPMAP_ID", True);
 	if (prop == None)
 		return FALSE;
-  
-	XGetWindowProperty(GDK_DISPLAY(), GDK_ROOT_WINDOW(), prop, 0L, 1L, False,
-			AnyPropertyType, &ret_type, &fmt, &nitems, &bytes_after,
-			&prop_return);
+
+	XGetWindowProperty(gdk_x11_display_get_xdisplay(gdk_display_get_default()), GDK_ROOT_WINDOW(), prop, 0L, 1L, False,
+					   AnyPropertyType, &ret_type, &fmt, &nitems, &bytes_after,
+					   &prop_return);
 	if (prop_return && ret_type == XA_PIXMAP)
 		{
 		root_pix = *((Pixmap *) prop_return);
@@ -544,14 +544,14 @@ gkrellm_winop_draw_rootpixmap_onto_transparent_chart(GkrellmChart *cp)
 	gint			x, y;
 
 	if (   root_xpixmap == None || trans_gc == NULL || !cp->transparency
-		|| !cp->drawing_area || !cp->drawing_area->window
+		|| !cp->drawing_area || !gtk_widget_get_window(cp->drawing_area)
 	   )
 		return FALSE;
-	XTranslateCoordinates(GDK_DISPLAY(),
-			GDK_WINDOW_XWINDOW(cp->drawing_area->window),
-			GDK_ROOT_WINDOW(),
-			0, 0, &x, &y, &child);
-	XSetTSOrigin(GDK_DISPLAY(), GDK_GC_XGC(trans_gc), -x, -y);
+	XTranslateCoordinates(gdk_x11_display_get_xdisplay(gdk_display_get_default()),
+						  GDK_WINDOW_XWINDOW(gtk_widget_get_window(cp->drawing_area)),
+						  GDK_ROOT_WINDOW(),
+						  0, 0, &x, &y, &child);
+	XSetTSOrigin(gdk_x11_display_get_xdisplay(gdk_display_get_default()), GDK_GC_XGC(trans_gc), -x, -y);
 
 	/* First make the chart totally transparent
 	*/
@@ -569,10 +569,10 @@ gkrellm_winop_draw_rootpixmap_onto_transparent_chart(GkrellmChart *cp)
 	m = &cp->style->margin;
 	if (cp->top_spacer.pixmap)
 		{
-		XSetTSOrigin(GDK_DISPLAY(), GDK_GC_XGC(trans_gc), -x, -(y - m->top));
-		gdk_draw_rectangle(cp->top_spacer.pixmap, trans_gc,
-					TRUE, 0, 0, cp->w, cp->style->margin.top);
-		if (cp->transparency == 2 && cp->top_spacer.mask)
+			XSetTSOrigin(gdk_x11_display_get_xdisplay(gdk_display_get_default()), GDK_GC_XGC(trans_gc), -x, -(y - m->top));
+			gdk_draw_rectangle(cp->top_spacer.pixmap, trans_gc,
+							   TRUE, 0, 0, cp->w, cp->style->margin.top);
+			if (cp->transparency == 2 && cp->top_spacer.mask)
 			{
 			gdk_gc_set_clip_mask(_GK.text_GC, cp->top_spacer.mask);
 			gdk_draw_drawable(cp->top_spacer.pixmap, _GK.text_GC,
@@ -585,11 +585,11 @@ gkrellm_winop_draw_rootpixmap_onto_transparent_chart(GkrellmChart *cp)
 
 	if (cp->bottom_spacer.pixmap)
 		{
-		XSetTSOrigin(GDK_DISPLAY(), GDK_GC_XGC(trans_gc),
-					-x, -(y + cp->h - m->bottom));
-		gdk_draw_rectangle(cp->bottom_spacer.pixmap, trans_gc,
-					TRUE, 0, 0, cp->w, cp->style->margin.bottom);
-		if (cp->transparency == 2 && cp->bottom_spacer.mask)
+			XSetTSOrigin(gdk_x11_display_get_xdisplay(gdk_display_get_default()), GDK_GC_XGC(trans_gc),
+						 -x, -(y + cp->h - m->bottom));
+			gdk_draw_rectangle(cp->bottom_spacer.pixmap, trans_gc,
+							   TRUE, 0, 0, cp->w, cp->style->margin.bottom);
+			if (cp->transparency == 2 && cp->bottom_spacer.mask)
 			{
 			gdk_gc_set_clip_mask(_GK.text_GC, cp->bottom_spacer.mask);
 			gdk_draw_drawable(cp->bottom_spacer.pixmap, _GK.text_GC,
@@ -611,14 +611,14 @@ gkrellm_winop_draw_rootpixmap_onto_transparent_panel(GkrellmPanel *p)
 	gint	x, y;
 
 	if (   root_xpixmap == None || trans_gc == NULL || !p->transparency
-		|| !p->drawing_area || !p->drawing_area->window
+		|| !p->drawing_area || !gtk_widget_get_window(p->drawing_area)
 	   )
 		return FALSE;
-	XTranslateCoordinates(GDK_DISPLAY(),
-			GDK_WINDOW_XWINDOW(p->drawing_area->window),
-			GDK_ROOT_WINDOW(),
-			0, 0, &x, &y, &child);
-	XSetTSOrigin(GDK_DISPLAY(), GDK_GC_XGC(trans_gc), -x, -y);
+	XTranslateCoordinates(gdk_x11_display_get_xdisplay(gdk_display_get_default()),
+						  GDK_WINDOW_XWINDOW(gtk_widget_get_window(p->drawing_area)),
+						  GDK_ROOT_WINDOW(),
+						  0, 0, &x, &y, &child);
+	XSetTSOrigin(gdk_x11_display_get_xdisplay(gdk_display_get_default()), GDK_GC_XGC(trans_gc), -x, -y);
 
 	/* First make the panel totally transparent
 	*/
@@ -641,15 +641,16 @@ draw_rootpixmap_onto_transparent_spacers(GkrellmMonitor *mon, gint xr, gint yr)
 	{
 	GkrellmMonprivate	*mp = mon->privat;
 	gint				x, y;
-
+	GtkAllocation alloc;
 	if (mp->top_spacer.image)
 		{
-		x = xr + mp->top_spacer.image->allocation.x;
-		y = yr + mp->top_spacer.image->allocation.y;
-		XSetTSOrigin(GDK_DISPLAY(), GDK_GC_XGC(trans_gc), -x, -y);
-		gdk_draw_rectangle(mp->top_spacer.pixmap, trans_gc,
-				TRUE, 0, 0, _GK.chart_width, mp->top_spacer.height);
-		if (mp->top_spacer.mask)
+			gtk_widget_get_allocation(mp->top_spacer.image, &alloc);
+			x = xr + alloc.x;
+			y = yr + alloc.y;
+			XSetTSOrigin(gdk_x11_display_get_xdisplay(gdk_display_get_default()), GDK_GC_XGC(trans_gc), -x, -y);
+			gdk_draw_rectangle(mp->top_spacer.pixmap, trans_gc,
+							   TRUE, 0, 0, _GK.chart_width, mp->top_spacer.height);
+			if (mp->top_spacer.mask)
 			{
 			gdk_gc_set_clip_mask(_GK.text_GC, mp->top_spacer.mask);
 			gdk_draw_drawable(mp->top_spacer.pixmap, _GK.text_GC,
@@ -661,12 +662,14 @@ draw_rootpixmap_onto_transparent_spacers(GkrellmMonitor *mon, gint xr, gint yr)
 		}
 	if (mp->bottom_spacer.image)
 		{
-		x = xr + mp->bottom_spacer.image->allocation.x;
-		y = yr + mp->bottom_spacer.image->allocation.y;
-		XSetTSOrigin(GDK_DISPLAY(), GDK_GC_XGC(trans_gc), -x, -y);
-		gdk_draw_rectangle(mp->bottom_spacer.pixmap, trans_gc,
-				TRUE, 0, 0, _GK.chart_width, mp->bottom_spacer.height);
-		if (mp->bottom_spacer.mask)
+			gtk_widget_get_allocation(mp->bottom_spacer.image, &alloc);
+
+			x = xr + alloc.x;
+			y = yr + alloc.y;
+			XSetTSOrigin(gdk_x11_display_get_xdisplay(gdk_display_get_default()), GDK_GC_XGC(trans_gc), -x, -y);
+			gdk_draw_rectangle(mp->bottom_spacer.pixmap, trans_gc,
+							   TRUE, 0, 0, _GK.chart_width, mp->bottom_spacer.height);
+			if (mp->bottom_spacer.mask)
 			{
 			gdk_gc_set_clip_mask(_GK.text_GC, mp->bottom_spacer.mask);
 			gdk_draw_drawable(mp->bottom_spacer.pixmap, _GK.text_GC,
@@ -699,10 +702,10 @@ gkrellm_winop_apply_rootpixmap_transparency(void)
 
 	if (!_GK.any_transparency)
 		return;
-	prop = XInternAtom(GDK_DISPLAY(), "_XROOTPMAP_ID", True);
+	prop = XInternAtom(gdk_x11_display_get_xdisplay(gdk_display_get_default()), "_XROOTPMAP_ID", True);
 	if (prop == None)
 		return;
-	XGetWindowProperty(GDK_DISPLAY(), GDK_ROOT_WINDOW(), prop, 0L, 1L, False,
+	XGetWindowProperty(gdk_x11_display_get_xdisplay(gdk_display_get_default()), GDK_ROOT_WINDOW(), prop, 0L, 1L, False,
 			AnyPropertyType, &ret_type, &fmt, &nitems, &bytes_after,
 			&prop_return);
 	if (prop_return && ret_type == XA_PIXMAP)
@@ -714,13 +717,13 @@ gkrellm_winop_apply_rootpixmap_transparency(void)
 		return;
 	if (trans_gc == NULL)
 		{
-		trans_gc = gdk_gc_new(top_window->window);
+		trans_gc = gdk_gc_new(gtk_widget_get_window(top_window));
 		gdk_gc_copy(trans_gc, _GK.draw1_GC);
 		}
 
 	depth_ret = 0;
-	depth_visual = gdk_drawable_get_visual(top_window->window)->depth;
-	if (   !XGetGeometry(GDK_DISPLAY(), root_xpixmap, &root_return,
+	depth_visual = gdk_drawable_get_depth(gdk_drawable_get_visual(gtk_widget_get_window(top_window)));
+	if (   !XGetGeometry(gdk_x11_display_get_xdisplay(gdk_display_get_default()), root_xpixmap, &root_return,
 				&x_ret, &y_ret, &w_ret, &h_ret, &bw_ret, &depth_ret)
 		|| depth_ret != depth_visual
 	   )
@@ -732,8 +735,8 @@ gkrellm_winop_apply_rootpixmap_transparency(void)
 	/* I could use gdk_pixmap_foreign_new() and stay in the gdk domain,
 	|  but it fails (in XGetGeometry()) if I change backgrounds.
 	*/
-	XSetTile(GDK_DISPLAY(), GDK_GC_XGC(trans_gc), root_xpixmap);
-	XSetFillStyle(GDK_DISPLAY(), GDK_GC_XGC(trans_gc), FillTiled);
+	XSetTile(gdk_x11_display_get_xdisplay(gdk_display_get_default()), GDK_GC_XGC(trans_gc), root_xpixmap);
+	XSetFillStyle(gdk_x11_display_get_xdisplay(gdk_display_get_default()), GDK_GC_XGC(trans_gc), FillTiled);
 	for (list = gkrellm_get_chart_list(); list; list = list->next)
 		{
 		cp = (GkrellmChart *) list->data;
@@ -749,8 +752,8 @@ gkrellm_winop_apply_rootpixmap_transparency(void)
 			continue;
 		gkrellm_draw_panel_label(p);
 		}
-	XTranslateCoordinates(GDK_DISPLAY(),
-			GDK_WINDOW_XWINDOW(top_window->window),
+	XTranslateCoordinates(gdk_x11_display_get_xdisplay(gdk_display_get_default()),
+			GDK_WINDOW_XWINDOW(gtk_widget_get_window(top_window)),
 			GDK_ROOT_WINDOW(),
 			0, 0, &x_root, &y_root, &child);
 	for (list = gkrellm_monitor_list; list; list = list->next)

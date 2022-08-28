@@ -741,8 +741,8 @@ gkrellm_decal_scroll_text_set_internal(GkrellmPanel *p, GkrellmDecal *d,
 
 	layout = decal_scroll_text_layout(d, text, &y_ink);
 	gkrellm_free_pixmap(&d->pixmap);
-	d->pixmap = gdk_pixmap_new(top_win->window,
-					d->scroll_width, d->scroll_height, -1);
+	d->pixmap = gdk_pixmap_new(gtk_widget_get_window(top_win),
+							   d->scroll_width, d->scroll_height, -1);
 
 	if (!d->pixmap)		/* too wide maybe? */
 		{
@@ -865,10 +865,10 @@ gkrellm_remove_krell(GkrellmPanel *p, GkrellmKrell *k)
 		{
 		gdk_draw_drawable(p->pixmap, _GK.draw1_GC, p->bg_pixmap,
 			dr->x_dst, dr->y_dst, dr->x_dst, dr->y_dst, dr->w, dr->h);
-		if (p->drawing_area && p->drawing_area->window)
-			gdk_draw_drawable(p->drawing_area->window, _GK.draw1_GC,
-				p->bg_pixmap,
-				dr->x_dst, dr->y_dst, dr->x_dst, dr->y_dst, dr->w, dr->h);
+		if (p->drawing_area && gtk_widget_get_window(p->drawing_area))
+			gdk_draw_drawable(gtk_widget_get_window(p->drawing_area), _GK.draw1_GC,
+							  p->bg_pixmap,
+							  dr->x_dst, dr->y_dst, dr->x_dst, dr->y_dst, dr->w, dr->h);
 		gkrellm_draw_panel_layers_force(p);
 		}
 	}
@@ -1050,8 +1050,8 @@ gkrellm_create_krell(GkrellmPanel *p, GkrellmPiximage *im, GkrellmStyle *style)
 	k->h = h_render;
 	k->w = w_render;
 
-	k->stencil = gdk_pixmap_new(top_win->window, _GK.chart_width,
-					k->h_frame, 1);
+	k->stencil = gdk_pixmap_new(gtk_widget_get_window(top_win), _GK.chart_width,
+								k->h_frame, 1);
 	k->period = style->krell_ema_period;
 	if (k->period >= 4 * _GK.update_HZ)
 		k->period = 4 * _GK.update_HZ;
@@ -1155,9 +1155,9 @@ _remove_decal(GkrellmPanel *p, GkrellmDecal *d)
 		{
 		gdk_draw_drawable(p->pixmap, _GK.draw1_GC, p->bg_pixmap,
 				d->x, d->y,  d->x, d->y,   d->w, d->h);
-		if (p->drawing_area && p->drawing_area->window)
-			gdk_draw_drawable(p->drawing_area->window, _GK.draw1_GC,
-					p->bg_pixmap, d->x, d->y,  d->x, d->y,   d->w, d->h);
+		if (p->drawing_area && gtk_widget_get_window(p->drawing_area))
+			gdk_draw_drawable(gtk_widget_get_window(p->drawing_area), _GK.draw1_GC,
+							  p->bg_pixmap, d->x, d->y, d->x, d->y, d->w, d->h);
 		gkrellm_draw_panel_layers_force(p);
 		}
 	}
@@ -1278,7 +1278,7 @@ gkrellm_create_decal_pixmap(GkrellmPanel *p,
 
 	d->pixmap = pixmap;
 	d->mask   = mask;
-	d->stencil = gdk_pixmap_new(top_win->window, d->w, d->h, 1);
+	d->stencil = gdk_pixmap_new(gtk_widget_get_window(top_win), d->w, d->h, 1);
 
 	d->value = -1;		/* Force initial draw */
 	d->flags = 0;
@@ -1365,9 +1365,10 @@ _create_decal_text(GkrellmPanel *p, gchar *string,
 		}
 	if (d->w == 0)
 		d->w = 1;
-	d->pixmap = gdk_pixmap_new(top_win->window, d->w, d->h, -1);;
+	d->pixmap = gdk_pixmap_new(gtk_widget_get_window(top_win), d->w, d->h, -1);
+	;
 	d->mask   = NULL;
-	d->stencil = gdk_pixmap_new(top_win->window, d->w, d->h, 1);
+	d->stencil = gdk_pixmap_new(gtk_widget_get_window(top_win), d->w, d->h, 1);
 
 	d->value = -1;		/* Force initial draw */
 	d->flags = DF_LOCAL_PIXMAPS;
@@ -1761,8 +1762,8 @@ gkrellm_make_overlay_button(GkrellmPanel *p, void (*func)(), void *data,
 	if (w < 4)
 		w = 4;
 
-	pixmap = gdk_pixmap_new(top_win->window, w, 2 * h, -1);
-	mask = gdk_pixmap_new(top_win->window, w, 2 * h, 1);
+	pixmap = gdk_pixmap_new(gtk_widget_get_window(top_win), w, 2 * h, -1);
+	mask = gdk_pixmap_new(gtk_widget_get_window(top_win), w, 2 * h, 1);
 
 	if (normal_piximage && pressed_piximage)
 		{
@@ -1993,8 +1994,8 @@ gkrellm_make_scaled_button(GkrellmPanel *p, GkrellmPiximage *im,
 		}
 
 	top_win = gkrellm_get_top_window();
-	pixmap = gdk_pixmap_new(top_win->window, w, depth * h, -1);
-	mask = gdk_pixmap_new(top_win->window, w, depth * h, 1);
+	pixmap = gdk_pixmap_new(gtk_widget_get_window(top_win), w, depth * h, -1);
+	mask = gdk_pixmap_new(gtk_widget_get_window(top_win), w, depth * h, 1);
 	if (set_default_border)
 		{
 		bdr = &im->border;
@@ -2051,8 +2052,8 @@ gkrellm_make_scaled_decal_pixmap(GkrellmPanel *p, GkrellmPiximage *im,
 		h = 1;
 	d->h = h;
 
-	pixmap = gdk_pixmap_new(top_win->window, d->w, d->h * depth, -1);
-	mask = gdk_pixmap_new(top_win->window, d->w, d->h * depth, 1);
+	pixmap = gdk_pixmap_new(gtk_widget_get_window(top_win), d->w, d->h * depth, -1);
+	mask = gdk_pixmap_new(gtk_widget_get_window(top_win), d->w, d->h * depth, 1);
 	gkrellm_scale_piximage_to_pixmap(im, &pixmap, &mask, d->w, d->h * depth);
 
 	d->x = x;
@@ -2072,7 +2073,7 @@ gkrellm_make_scaled_decal_pixmap(GkrellmPanel *p, GkrellmPiximage *im,
 
 	d->pixmap = pixmap;
 	d->mask   = mask;
-	d->stencil = gdk_pixmap_new(top_win->window, d->w, d->h, 1);
+	d->stencil = gdk_pixmap_new(gtk_widget_get_window(top_win), d->w, d->h, 1);
 
 	d->value = -1;		/* Force initial draw */
 	d->flags = DF_LOCAL_PIXMAPS;

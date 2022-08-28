@@ -136,7 +136,7 @@ gkrellm_winop_place_gkrellm(gchar *geom)
 	if (   newX >= 0 && newX < _GK.w_display - 10
 	    && newY >= 0 && newY < _GK.h_display - 25)
 		{
-		gdk_window_move(gkrellm_get_top_window()->window, newX, newY);
+		gdk_window_move(gtk_widget_get_window(gkrellm_get_top_window()), newX, newY);
 		_GK.y_position = newY;
 		_GK.x_position = newX;
 		}
@@ -163,14 +163,14 @@ gkrellm_winop_update_struts(void)
 gboolean
 gkrellm_winop_draw_rootpixmap_onto_transparent_chart(GkrellmChart *p)
 	{
-	if (!p->transparency || !p->drawing_area || !p->drawing_area->window || !trans_gc)
-		return FALSE;
+		if (!p->transparency || !p->drawing_area || !gtk_widget_get_window(p->drawing_area) || !trans_gc)
+			return FALSE;
 
-	// Fill the panel with transparency color
-	gdk_draw_rectangle(p->bg_src_pixmap, trans_gc, TRUE, 0, 0, p->w, p->h);
+		// Fill the panel with transparency color
+		gdk_draw_rectangle(p->bg_src_pixmap, trans_gc, TRUE, 0, 0, p->w, p->h);
 
-	// If mode permits, stencil on non transparent parts of bg_clean_pixmap.
-	if (p->transparency == 2 && p->bg_mask)
+		// If mode permits, stencil on non transparent parts of bg_clean_pixmap.
+		if (p->transparency == 2 && p->bg_mask)
 		{
 		gdk_gc_set_clip_mask(_GK.text_GC, p->bg_mask);
 		gdk_draw_drawable(p->bg_src_pixmap, _GK.text_GC, p->bg_clean_pixmap,
@@ -185,17 +185,17 @@ gkrellm_winop_draw_rootpixmap_onto_transparent_chart(GkrellmChart *p)
 gboolean
 gkrellm_winop_draw_rootpixmap_onto_transparent_panel(GkrellmPanel *p)
 	{
-	if (!p->transparency || !p->drawing_area || !p->drawing_area->window || !trans_gc)
-		return FALSE;
+		if (!p->transparency || !p->drawing_area || !gtk_widget_get_window(p->drawing_area) || !trans_gc)
+			return FALSE;
 
-	gdk_gc_set_fill(trans_gc, GDK_SOLID);
-	gdk_gc_set_foreground(trans_gc, &trans_color);
+		gdk_gc_set_fill(trans_gc, GDK_SOLID);
+		gdk_gc_set_foreground(trans_gc, &trans_color);
 
-	// Fill the panel with transparency color
-	gdk_draw_rectangle(p->bg_pixmap, trans_gc, TRUE, 0, 0, p->w, p->h);
+		// Fill the panel with transparency color
+		gdk_draw_rectangle(p->bg_pixmap, trans_gc, TRUE, 0, 0, p->w, p->h);
 
-	// If mode permits, stencil on non transparent parts of bg_clean_pixmap.
-	if (p->transparency == 2 && p->bg_mask)
+		// If mode permits, stencil on non transparent parts of bg_clean_pixmap.
+		if (p->transparency == 2 && p->bg_mask)
 		{
 		gdk_gc_set_clip_mask(_GK.text_GC, p->bg_mask);
 		gdk_draw_drawable(p->bg_pixmap, _GK.text_GC, p->bg_clean_pixmap,
@@ -257,7 +257,7 @@ gkrellm_winop_apply_rootpixmap_transparency(void)
 	GkrellmPanel	*p;
 	HWND			w;
 
-	w = GDK_WINDOW_HWND(gkrellm_get_top_window()->window);
+	w = GDK_WINDOW_HWND(gtk_widget_get_window(gkrellm_get_top_window()));
 	if (!_GK.any_transparency && isTransparent)
 		{	// make opaque
 		SetWindowLong(w, GWL_EXSTYLE, GetWindowLong(w, GWL_EXSTYLE) & ~WS_EX_LAYERED);
@@ -270,7 +270,7 @@ gkrellm_winop_apply_rootpixmap_transparency(void)
 			{
 			GdkColormap *cm = gtk_widget_get_colormap(gkrellm_get_top_window());
 
-			trans_gc = gdk_gc_new(gkrellm_get_top_window()->window);
+			trans_gc = gdk_gc_new(gtk_widget_get_window(gkrellm_get_top_window()));
 			if (trans_gc == NULL)
 				{
 				g_warning("Could not create trans_gc!\n");

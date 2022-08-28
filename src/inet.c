@@ -394,8 +394,8 @@ draw_inet_mark_data(InetMon *in, gint minute_mark)
 			gdk_draw_line(cp->pixmap, gc3,
 						cp->x + n, cp->h - 1, cp->x + n, y);
 		}
-	gdk_draw_drawable(cp->drawing_area->window, gc1, cp->pixmap,
-			0, y,  0, y,  cp->w, cp->y);
+		gdk_draw_drawable(gtk_widget_get_window(cp->drawing_area), gc1, cp->pixmap,
+						  0, y, 0, y, cp->w, cp->y);
 	}
 
 static void
@@ -772,10 +772,10 @@ inet_expose_event(GtkWidget *widget, GdkEventExpose *ev)
 			pixmap = in->chart_hour->pixmap;
 		if (pixmap)
 			{
-			gdk_draw_drawable(widget->window, gkrellm_draw_GC(1), pixmap,
-					ev->area.x, ev->area.y, ev->area.x, ev->area.y,
-					ev->area.width, ev->area.height);
-			break;
+				gdk_draw_drawable(gtk_widget_get_window(widget), gkrellm_draw_GC(1), pixmap,
+								  ev->area.x, ev->area.y, ev->area.x, ev->area.y,
+								  ev->area.width, ev->area.height);
+				break;
 			}
 		}
 	return FALSE;
@@ -1704,8 +1704,8 @@ cb_enter(GtkWidget *widget, gpointer data)
 
 	in = g_new0(InetMon, 1);
 
-	in->data0_is_range = GTK_TOGGLE_BUTTON(data0_range_button)->active;
-	in->data1_is_range = GTK_TOGGLE_BUTTON(data1_range_button)->active;
+	in->data0_is_range = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data0_range_button));
+	in->data1_is_range = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data1_range_button));
 
 	in->label0 = gkrellm_gtk_entry_get_text(&label0_entry);
 	if (*(in->label0))

@@ -703,9 +703,11 @@ static gint
 net_stats_window_configure_cb(GtkWidget *widget, GdkEventConfigure *ev,
 			gpointer data)
 	{
-	net_stats_window_height = widget->allocation.height;
-	gkrellm_config_modified();
-	return FALSE;
+		GtkAllocation alloc;
+		gtk_widget_get_allocation(widget, &alloc);
+		net_stats_window_height = alloc.height;
+		gkrellm_config_modified();
+		return FALSE;
 	}
 
 static void
@@ -1125,7 +1127,7 @@ net_expose_event(GtkWidget *widget, GdkEventExpose *ev)
 				break;
 			}
 	if (pixmap)
-		gdk_draw_drawable(widget->window, gkrellm_draw_GC(1), pixmap,
+		gdk_draw_drawable(gtk_widget_get_window(widget), gkrellm_draw_GC(1), pixmap,
 			ev->area.x, ev->area.y, ev->area.x, ev->area.y,
 			ev->area.width, ev->area.height);
 	return FALSE;
@@ -2656,7 +2658,7 @@ cb_force(GtkWidget *button, NetMon *net)
 	{
 	if (enable_in_progress)
 		return;
-	net->force_up = GTK_TOGGLE_BUTTON(button)->active;
+	net->force_up = gtk_toggle_button_get_active(button);
 	if (net != net_timed)
 		net->locked = FALSE;
 	sync_chart(net);
@@ -2666,7 +2668,7 @@ static void
 cb_enable(GtkWidget *button, NetMon *net)
 	{
 	enable_in_progress = TRUE;
-	net->enabled = GTK_TOGGLE_BUTTON(button)->active;
+	net->enabled = gtk_toggle_button_get_active(button);
 	if (net->force_button)
 		{
 		if (net->enabled)
@@ -2787,9 +2789,9 @@ cb_alert_config(GkrellmAlert *ap, NetMon *net)
 		}
 #endif
 	net->alert_uses_rx =
-			GTK_TOGGLE_BUTTON(net->alert_config_rx_button)->active;
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(net->alert_config_rx_button));
 	net->alert_uses_tx =
-			GTK_TOGGLE_BUTTON(net->alert_config_tx_button)->active;
+		gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(net->alert_config_tx_button));
 	}
 
 static void
@@ -2797,8 +2799,8 @@ cb_alert_config_button(GtkWidget *button, NetMon *net)
 	{
 	gboolean	read, write;
 
-	read = GTK_TOGGLE_BUTTON(net->alert_config_rx_button)->active;
-	write = GTK_TOGGLE_BUTTON(net->alert_config_tx_button)->active;
+	read = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(net->alert_config_rx_button));
+	write = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(net->alert_config_tx_button));
 	if (!read && !write)
 		{
 		gtk_toggle_button_set_active(
@@ -2824,7 +2826,7 @@ static void
 cb_timer_enable(GtkWidget *button, gpointer data)
 	{
 	gkrellm_panel_enable_visibility(timer_panel,
-				GTK_TOGGLE_BUTTON(enable_net_timer_button)->active,
+				gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(enable_net_timer_button)),
 				&timer_button_enabled);
 	gtk_widget_set_sensitive(net_timer_seconds_button, timer_button_enabled);
 	if (timer_iface_combo_box)
@@ -2840,7 +2842,7 @@ cb_timer_enable(GtkWidget *button, gpointer data)
 static void
 cb_timer_seconds(GtkWidget *button, gpointer data)
 	{
-	timer_seconds = GTK_TOGGLE_BUTTON(button)->active;
+	timer_seconds = gtk_toggle_button_get_active(button);
 	gkrellm_panel_destroy(timer_panel);
 	create_net_timer(timer_vbox, TRUE);
 	draw_timer(timer_panel, last_time , 1);
@@ -2947,7 +2949,7 @@ cb_reset_mday(GtkWidget *widget, GtkSpinButton *spin)
 static void
 cb_net_enabled_as_default(GtkWidget *button, gpointer data)
 	{
-	net_enabled_as_default = GTK_TOGGLE_BUTTON(button)->active;
+	net_enabled_as_default = gtk_toggle_button_get_active(button);
 	}
 
 static void

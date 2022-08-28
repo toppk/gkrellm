@@ -114,8 +114,8 @@ gkrellm_clear_chart(GkrellmChart *cp)
 						0, 0,	0, 0,   cp->w, cp->h);
 	gdk_draw_drawable(cp->bg_pixmap, _GK.draw1_GC, cp->bg_src_pixmap,
 						0, 0,	0, 0,   cp->w, cp->h);
-	if (cp->drawing_area->window)
-		gdk_draw_drawable(cp->drawing_area->window, _GK.draw1_GC, cp->pixmap,
+	if (gtk_widget_get_window(cp->drawing_area))
+		gdk_draw_drawable(gtk_widget_get_window(cp->drawing_area), _GK.draw1_GC, cp->pixmap,
 						0, 0,	0, 0,   cp->w, cp->h);
 	}
 
@@ -158,8 +158,8 @@ gkrellm_draw_chart_to_screen(GkrellmChart *cp)
 	{
 	/* Draw the expose pixmap onto the screen.
 	*/
-	if (cp && cp->drawing_area->window)
-		gdk_draw_drawable(cp->drawing_area->window, _GK.draw1_GC, cp->pixmap,
+	if (cp && gtk_widget_get_window(cp->drawing_area))
+		gdk_draw_drawable(gtk_widget_get_window(cp->drawing_area), _GK.draw1_GC, cp->pixmap,
 						0, 0,	0, 0,   cp->w, cp->h);
 	}
 
@@ -1480,8 +1480,8 @@ gkrellm_add_chartdata(GkrellmChart *cp, GdkPixmap **src_pixmap,
 	cd->chart = cp;
 	gkrellm_dup_string(&cd->label, label);
 	cd->monotonic = TRUE;
-	cd->data_bitmap = gdk_pixmap_new(top_win->window, cp->w, cp->h, 1);
-	cd->layer.pixmap = gdk_pixmap_new(top_win->window, cp->w, cp->h, -1);
+	cd->data_bitmap = gdk_pixmap_new(gtk_widget_get_window(top_win), cp->w, cp->h, 1);
+	cd->layer.pixmap = gdk_pixmap_new(gtk_widget_get_window(top_win), cp->w, cp->h, -1);
 	cd->layer.src_pixmap = src_pixmap;
 	cd->layer.grid_pixmap = grid_pixmap;
 
@@ -1510,7 +1510,7 @@ gkrellm_render_data_grid_pixmap(GkrellmPiximage *im, GdkPixmap **pixmap,
 		else
 			{
 			gkrellm_free_pixmap(pixmap);
-			*pixmap = gdk_pixmap_new(top_win->window, w, 1, -1);
+			*pixmap = gdk_pixmap_new(gtk_widget_get_window(top_win), w, 1, -1);
 			if (color)
 				gdk_gc_set_foreground(_GK.draw1_GC, color);
 			else
@@ -1535,7 +1535,7 @@ gkrellm_render_data_pixmap(GkrellmPiximage *im, GdkPixmap **pixmap,
 		{
 		if (!gkrellm_scale_piximage_to_pixmap(im, pixmap, NULL, w, h))
 			{
-			*pixmap = gdk_pixmap_new(top_win->window, w, h, -1);
+			*pixmap = gdk_pixmap_new(gtk_widget_get_window(top_win), w, h, -1);
 			if (color)
 				gdk_gc_set_foreground(_GK.draw1_GC, color);
 			else
@@ -1758,7 +1758,7 @@ render_chart_margin_spacers(GkrellmChart *cp)
 static gboolean
 cb_chart_map_event(GtkWidget *widget, GdkEvent *event, GkrellmChart *cp)
     {
-    gdk_window_get_position(cp->drawing_area->window, NULL, &cp->y_mapped);
+    gdk_window_get_position(gtk_widget_get_window(cp->drawing_area), NULL, &cp->y_mapped);
 	if (_GK.frame_left_chart_overlap > 0 || _GK.frame_right_chart_overlap > 0)
 		_GK.need_frame_packing = TRUE;
     return FALSE;
@@ -1769,7 +1769,7 @@ static gboolean
 cb_chart_size_allocate(GtkWidget *widget, GtkAllocation *size,
 				GkrellmChart *cp)
     {
-    gdk_window_get_position(cp->drawing_area->window, NULL, &cp->y_mapped);
+    gdk_window_get_position(gtk_widget_get_window(cp->drawing_area), NULL, &cp->y_mapped);
 	if (_GK.frame_left_chart_overlap > 0 || _GK.frame_right_chart_overlap > 0)
 		_GK.need_frame_packing = TRUE;
     return FALSE;
@@ -2253,8 +2253,8 @@ gkrellm_set_chart_height(GkrellmChart *cp, gint h)
 		cd = (GkrellmChartdata *) list->data;
 		g_object_unref(G_OBJECT(cd->data_bitmap));
 		g_object_unref(G_OBJECT(cd->layer.pixmap));
-		cd->data_bitmap = gdk_pixmap_new(top_win->window, cp->w, cp->h, 1);
-		cd->layer.pixmap = gdk_pixmap_new(top_win->window, cp->w, cp->h, -1);
+		cd->data_bitmap = gdk_pixmap_new(gtk_widget_get_window(top_win), cp->w, cp->h, 1);
+		cd->layer.pixmap = gdk_pixmap_new(gtk_widget_get_window(top_win), cp->w, cp->h, -1);
 		}
 	cp->bg_sequence_id += 1;
 	render_chart_pixmaps(cp);
@@ -2321,7 +2321,7 @@ set_resolution_menubar_items_sensitivity(GkrellmChartconfig *cf)
 
 	w = gtk_ui_manager_get_widget(cf->auto_resolution_ui_manager,
                                       "/menubar/Control/AutoModeStickPeak");
-	GTK_CHECK_MENU_ITEM(w)->active = cf->auto_resolution_stick;
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(w), cf->auto_resolution_stick);
 
 	w = gtk_ui_manager_get_widget(cf->auto_resolution_ui_manager,
                                       "/menubar/Control/AutoModeRecalibrate");
@@ -2366,7 +2366,7 @@ static void
 cb_line_draw_style(GtkWidget *widget, GkrellmChartdata *cd)
 	{
 	_GK.config_modified = TRUE;
-	cd->draw_style = GTK_TOGGLE_BUTTON(widget)->active;
+	cd->draw_style = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 	gkrellm_rescale_chart(cd->chart);
 	}
 
@@ -2377,7 +2377,7 @@ cb_auto_resolution(GtkWidget *widget, GkrellmChart *cp)
 	GkrellmChartconfig	*cf = cp->config;
 
 	_GK.config_modified = TRUE;
-	cf->auto_grid_resolution = GTK_TOGGLE_BUTTON(widget)->active;
+	cf->auto_grid_resolution = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 
 	set_resolution_menubar_items_sensitivity(cf);
 	button = cf->grid_resolution_spin_button;
@@ -2392,7 +2392,7 @@ static void
 cb_inverted_draw_mode(GtkWidget *widget, GkrellmChartdata *cd)
 	{
 	_GK.config_modified = TRUE;
-	cd->inverted = GTK_TOGGLE_BUTTON(widget)->active;
+	cd->inverted = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 	gkrellm_rescale_chart(cd->chart);
 	}
 
@@ -2400,7 +2400,7 @@ static void
 cb_hide(GtkWidget *widget, GkrellmChartdata *cd)
 	{
 	_GK.config_modified = TRUE;
-	cd->hide = GTK_TOGGLE_BUTTON(widget)->active;
+	cd->hide = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 	set_chartdata_split_heights(cd->chart);
 	gkrellm_rescale_chart(cd->chart);
 	}
@@ -2409,7 +2409,7 @@ static void
 cb_split_mode(GtkWidget *widget, GkrellmChartdata *cd)
 	{
 	_GK.config_modified = TRUE;
-	cd->split_chart = GTK_TOGGLE_BUTTON(widget)->active;
+	cd->split_chart = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 	gtk_widget_set_sensitive(cd->split_fraction_spin_button, cd->split_chart);
 	set_chartdata_split_heights(cd->chart);
 	gkrellm_rescale_chart(cd->chart);
@@ -2688,7 +2688,7 @@ gkrellm_chartconfig_window_create(GkrellmChart *cp)
 	gtk_box_pack_start(GTK_BOX(main_vbox), hbox, FALSE, FALSE, 0);
 
 	button = gtk_button_new_from_stock(GTK_STOCK_OK);
-	GTK_WIDGET_SET_FLAGS(button, GTK_CAN_DEFAULT);
+	gtk_widget_set_can_default(button, TRUE);
 	g_signal_connect(G_OBJECT(button), "clicked",
 			G_CALLBACK(chart_config_window_close), cp);
     gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 15);
