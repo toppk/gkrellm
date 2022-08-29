@@ -796,6 +796,26 @@ gkrellm_sensors_interface_remove(gint _interface)
 	while (removed_one);		
 	}
 
+	gboolean
+	gkrellm_sys_sensors_mbmon_port_change(gint port)
+	{
+		gboolean result = FALSE;
+#if !defined(WIN32) && defined(SENSORS_COMMON)
+		_GK.mbmon_port = port;
+
+		/* TODO: does it matter if it has run or not? */
+		/* mbmon_check_func will be set if sysdep code has included
+		|  sensors_common.c and has run gkrellm_sys_sensors_mbmon_check()
+		*/
+		gkrellm_sensors_interface_remove(MBMON_INTERFACE);
+		result = gkrellm_sys_sensors_mbmon_check(TRUE);
+		gkrellm_sensors_model_update();
+		gkrellm_sensors_rebuild(TRUE, TRUE, TRUE);
+
+#endif
+		return result;
+	}
+
 static void
 add_sensor_monitor(Sensor *sr, GkrellmPanel **p, GList **smon_list)
 	{

@@ -74,25 +74,7 @@ gkrellm_sys_get_system_name(void)
 	}
 #endif
 
-gboolean
-gkrellm_sys_sensors_mbmon_port_change(gint port)
-	{
-	gboolean	result = FALSE;
-#if !defined(WIN32) && defined(SENSORS_COMMON)
-	_GK.mbmon_port = port;
 
-	/* TODO: does it matter if it has run or not? */
-	/* mbmon_check_func will be set if sysdep code has included
-	|  sensors_common.c and has run gkrellm_sys_sensors_mbmon_check()
-	*/
-	gkrellm_sensors_interface_remove(MBMON_INTERFACE);
-	result = gkrellm_sys_sensors_mbmon_check(TRUE);
-	gkrellm_sensors_model_update();
-	gkrellm_sensors_rebuild(TRUE, TRUE, TRUE);
-
-#endif
-	return result;
-	}
 
 gboolean
 gkrellm_sys_sensors_mbmon_supported(void)
@@ -103,5 +85,35 @@ gkrellm_sys_sensors_mbmon_supported(void)
 		/* return mbmon_check_func ? TRUE : FALSE; */
 #else
 	return FALSE;
+#endif
+	}
+
+	/* Remove embedded "-i2c-" or "-isa-" from lm_sensors chip names so
+|  there can be a chance for config name sysfs compatibility.  This function
+|  here in sensors.c is a kludge.  Give user configs a chance to get
+|  converted and then move this function to sysdeps/linux.c where it
+|  belongs.
+|  Munge names like w83627hf-isa-0290 to w83627hf-0290
+|                or w83627hf-i2c-0-0290 to w83627hf-0-0290
+*/
+	void
+	gkrellm_sensors_linux_name_fix(gchar *id_name)
+	{
+#if defined(__linux__)
+		gchar *s;
+		gint len, bus = 0;
+		guint addr = 0;
+
+		len = strlen(id_name) + 1;
+		if ((s = strstr(id_name, "-i2c-")) != NULL)
+		{
+			sscanf(s + 5, "%d-%x", &bus, &addr);
+			snprintf(s, len - (s - id_name), "-%d-%04x", bus, addr);
+		}
+		else if ((s = strstr(id_name, "-isa-")) != NULL)
+		{
+			*(s + 1) = '0';
+			memmove(s + 2, s + 4, strlen(s + 4) + 1);
+		}
 #endif
 	}
