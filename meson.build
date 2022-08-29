@@ -26,6 +26,7 @@ else
    libgtop = null_dep
 endif
 
+enable_nls = get_option('enable_nls')
 
 openssl = dependency('openssl', version: '>= 3.0.5', required : false)
 
@@ -48,14 +49,17 @@ if buildclient
       clientdeps += openssl
       clientargs += '-DHAVE_SSL'
    endif
+   if lmsensors.found()
+      clientdeps += lmsensors
+      clientargs += '-DHAVE_LIBSENSORS=1'
+   endif
    if libgtop.found()
       clientdeps += libgtop
       clientargs += '-DUSE_LIBGTOP'
    endif
-   if lmsensors.found()
-      clientdeps += lmsensors
-      clientargs += '-DHAVE_LIBSENSORS=1'
-    endif
+   if enable_nls
+      clientargs += '-DENABLE_NLS'
+   endif
 endif
 
 serverdeps = []
@@ -70,9 +74,15 @@ if libgtop.found()
    serverdeps += libgtop
    serverargs += '-DUSE_LIBGTOP'
 endif
+if enable_nls
+   serverargs += '-DENABLE_NLS'
+endif
 
 # debugging
 debugargs = []
+if 1 == 1
+   debugargs += ['-DGTK_DISABLE_SINGLE_INCLUDES' ]
+endif
 if 1 == 1
    debugargs += ['-DGDK_DISABLE_DEPRECATED', '-DGTK_DISABLE_DEPRECATED' ]
 endif
@@ -123,7 +133,7 @@ src = ['src/client/alerts.c', 'src/client/base64.c', 'src/client/battery.c', 'sr
        'src/client/clock.c', 'src/client/config.c', 'src/client/cpu.c', 'src/client/deprecated.c', 'src/client/disk.c',
        'src/client/fs.c', 'src/client/gui.c', 'src/client/hostname.c', 'src/client/inet.c', 'src/client/krell.c', 'src/client/mail.c',
        'src/client/main.c', 'src/client/md5c.c', 'src/client/mem.c', 'src/client/net.c', 'src/client/panel.c', 'src/client/pixops.c',
-       'src/client/plugins.c', 'src/client/sysdeps-unix.c', 'src/client/utils.c']
+       'src/client/plugins.c', 'src/client/sysdeps-unix.c', 'src/client/utils-client.c']
 # gui (+extras for windows)
 if host_system == 'windows'
    src += ['src/client/winops-win32.c', 'src/client/win32-plugin.c', 'src/client/win32-libgkrellm.c']
@@ -142,15 +152,15 @@ endif
 
 
 server = ['src/server/mail.c', 'src/server/main.c', 'src/server/monitor.c', 'src/server/plugins.c',
-          'src/server/utils.c', 'src/server/sysdeps-unix.c']
+          'src/server/sysdeps-unix.c']
 if host_system == 'windows'
    sysdepargs += ['-DWIN32']
    server += ['src/server/win32-libgkrellmd.c', 'src/server/win32-plugin.c']
 endif
 server += sysdepsrc
 
-sharedh = include_directories('src/shared')
-shared = ['src/shared/log.c']
+#sharedh = include_directories('src/shared')
+shared = ['src/shared/log.c', 'src/shared/utils.c']
 
 
 clientargs += sysdepargs
@@ -163,13 +173,11 @@ if buildclient
    client = executable('gkrellm', 
                        shared + src, 
                        dependencies : clientdeps,
-                       include_directories : sharedh,
                        c_args : clientargs + debugargs)
 endif
 if buildserver
     server = executable('gkrellmd',
                         shared + server,
                         dependencies : serverdeps,
-                        include_directories: sharedh,
                         c_args : serverargs + debugargs)
 endif

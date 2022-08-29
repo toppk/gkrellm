@@ -1,12 +1,13 @@
 * charts to cairo
 * working on gtk3
-* nls/translation
+* nls/translation (enabled, packaged, up2date)
 * optional libraries (sensors ntlm gnutls openssl gtop etc?)
 * no deprecations on gtk3
 * windows/macos/freebsd sysdeps
 * wayland/no-X11
 * configuration location ~/.config/gkrellm
 * plugins
+* version information
 * improved protocol for daemon (versioning support)
 * apis for daemon
 * transparency
@@ -24,3 +25,5 @@
 * releasing
 * documentation
 * tabify
+* look for other forks/plugins/themes and bring them all home
+* shrink boilerplate

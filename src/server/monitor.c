@@ -2350,7 +2350,7 @@ gkrellmd_client_read(gint fd, gint nbytes)
 	if (!list)
 		return;
 
-	while (gkrellmd_getline_from_gstring(&client->input_gstring,
+	while (gkrellm_getline_from_gstring(&client->input_gstring,
 				buf, sizeof(buf) - 1))
 		{
 		if (*buf == '<')

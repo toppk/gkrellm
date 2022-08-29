@@ -17,5 +17,11 @@ option(
   value : 'false',
   description : 'use libgtop.'
 )
+option(
+  'enable_nls',
+  type : 'boolean',
+  value : 'false',
+  description : 'enable translations.'
+)
 
 

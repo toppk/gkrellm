@@ -31,7 +31,7 @@
 |  as that of the covered work.
 */
 
-#include "../gkrellm-sysdeps.h"
+#include "gkrellm-sysdeps.h"
 
 #if defined(WIN32)
 // Enable getaddrinfo on win32 if we target win xp or newer
@@ -90,16 +90,6 @@
     && !defined(__APPLE__) && !defined(__DragonFly__)
 #define  USE_LIBGTOP
 #endif
-
-#define DEBUG_SYSDEP		0x1
-#define DEBUG_SERVER		0x2
-#define DEBUG_MAIL			0x10
-#define DEBUG_NET			0x20
-#define DEBUG_TIMER			0x40
-#define DEBUG_SENSORS		0x80
-#define DEBUG_NO_LIBSENSORS	0x100
-#define DEBUG_INET          0x800
-#define	DEBUG_BATTERY		0x8000
 
 
 #define SENSOR_TEMPERATURE  0
