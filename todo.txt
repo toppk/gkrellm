@@ -29,3 +29,5 @@
 * shrink boilerplate
 * client/sensors.c has some sysdep interface functions should be in
   systems/sensors-common.c
+* move to meson: HAVE_GETADDRINFO
+* clean up md5

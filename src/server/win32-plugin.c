@@ -44,10 +44,10 @@ void win32_init_callbacks(void)
     |  common to gkrellm and gkrellmd, but for convenience, offer them in
     |  both gkrellm_ and gkrellmd_ namespaces.
     */
-    gkrellmd_callbacks.gkrellmd_free_glist_and_data = gkrellmd_free_glist_and_data;
-    gkrellmd_callbacks.gkrellmd_getline_from_gstring = gkrellmd_getline_from_gstring;
-    gkrellmd_callbacks.gkrellmd_dup_token = gkrellmd_dup_token;
-    gkrellmd_callbacks.gkrellmd_dup_string = gkrellmd_dup_string;
+    gkrellmd_callbacks.gkrellmd_free_glist_and_data = gkrellm_free_glist_and_data;
+    gkrellmd_callbacks.gkrellmd_getline_from_gstring = gkrellm_getline_from_gstring;
+    gkrellmd_callbacks.gkrellmd_dup_token = gkrellm_dup_token;
+    gkrellmd_callbacks.gkrellmd_dup_string = gkrellm_dup_string;
     
     gkrellmd_callbacks.gkrellm_free_glist_and_data = gkrellm_free_glist_and_data;
     gkrellmd_callbacks.gkrellm_getline_from_gstring = gkrellm_getline_from_gstring;

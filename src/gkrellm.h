@@ -1,5 +1,8 @@
 
 
+#ifndef GKRELLM_H
+#define GKRELLM_H
+
 #if defined(GKRELLM_SERVER)
 
 #if !defined(PACKAGE)
@@ -36,3 +39,4 @@
 #define dcgettext(Domain, String, Type) (String)
 #define bindtextdomain(Domain, Directory) (Domain)
 #endif /* ENABLE_NLS */
+#endif

@@ -25,7 +25,7 @@
 #ifndef WIN32_PLUGIN_H
 #define WIN32_PLUGIN_H
 
-#include "../gkrellm.h"
+#include "gkrellm.h"
 
 typedef struct
 {

@@ -1,6 +1,7 @@
 
 
-#ifndef GKRELLM_PRIVATE
+#ifndef GKRELLM_PRIVATE_H
+#define GKRELLM_PRIVATE_H
 
 #if defined(GKRELLM_SERVER)
 #include "gkrellm-private-server.h"
@@ -25,5 +26,4 @@
 #define DEBUG_CHART_TEXT 0x10000
 #define DEBUG_PLUGIN 0x20000
 
-#define GKRELLM_PRIVATE
 #endif

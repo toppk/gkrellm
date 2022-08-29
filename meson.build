@@ -7,6 +7,8 @@ project(
        default_options : []
 )
 
+windows = import('windows')
+
 host_system = host_machine.system()
 buildclient = not get_option('onlyserver')
 cc = meson.get_compiler('c')
@@ -28,10 +30,26 @@ endif
 
 enable_nls = get_option('enable_nls')
 
+if host_system == 'windows'
+   winpdh = cc.find_library('pdh')
+   winnetapi32 = cc.find_library('netapi32')
+   winiphlpapi = cc.find_library('iphlpapi')
+   winintl = cc.find_library('intl')
+   winwtsapi32 = cc.find_library('wtsapi32')
+   winws2_32 = cc.find_library('ws2_32')
+   windeps = [winws2_32, winwtsapi32, winpdh, winnetapi32, winiphlpapi, winintl]
+endif
+
 openssl = dependency('openssl', version: '>= 3.0.5', required : false)
+## Only use own md5-code if neither OpenSSL nor GnuTLS are present
+#ifneq ($(HAVE_SSL),1)
+#    EXTRAOBJS += md5c.o
+#endif
 
 clientdeps = []
 clientargs = []
+clientlinks = []
+clientlinkwiths = []
 
 if buildclient
    clientdeps += dependency('gtk+-2.0', version : '>=2.24.33', required : true)
@@ -64,6 +82,9 @@ endif
 
 serverdeps = []
 serverargs = ['-DGKRELLM_SERVER']
+serverlinks = []
+serverlinkwiths = []
+
 serverdeps += dependency('glib-2.0', version : '>= 2.72.1', required : true)
 serverdeps += dependency('gmodule-2.0', version : '>=2.72.1', required : true)
 if lmsensors.found()
@@ -132,11 +153,17 @@ endif
 src = ['src/client/alerts.c', 'src/client/base64.c', 'src/client/battery.c', 'src/client/chart.c', 'src/client/client.c',
        'src/client/clock.c', 'src/client/config.c', 'src/client/cpu.c', 'src/client/deprecated.c', 'src/client/disk.c',
        'src/client/fs.c', 'src/client/gui.c', 'src/client/hostname.c', 'src/client/inet.c', 'src/client/krell.c', 'src/client/mail.c',
-       'src/client/main.c', 'src/client/md5c.c', 'src/client/mem.c', 'src/client/net.c', 'src/client/panel.c', 'src/client/pixops.c',
-       'src/client/plugins.c', 'src/client/utils-client.c']
+       'src/client/main.c', 'src/client/mem.c', 'src/client/net.c', 'src/client/panel.c', 'src/client/pixops.c',
+       'src/client/plugins.c', 'src/client/proc.c', 'src/client/sensors.c', 'src/client/utils-client.c', 'src/client/uptime.c']
 # gui (+extras for windows)
 if host_system == 'windows'
-   src += ['src/client/winops-win32.c', 'src/client/win32-plugin.c', 'src/client/win32-libgkrellm.c']
+   cwinrsc = windows.compile_resources('src/client/win32-resource.rc')
+   src += cwinrsc
+   libgkrellm = static_library('gkrellm', 'src/client/win32-libgkrellm.c',
+                               c_args : clientargs + debugargs,
+                               dependencies : clientdeps)
+   src += ['src/client/winops-win32.c', 'src/client/win32-plugin.c']
+   src += ['src/client/md5c.c']
 elif host_system == 'darwin'
    src += ['src/client/winops-gtk-mac.c']
 else
@@ -145,38 +172,57 @@ endif
 # sysdeps
 src += sysdepsrc
 
-if host_system != 'windows'
-   src += [ 'src/client/uptime.c', 'src/client/sensors.c', 'src/client/proc.c']
-endif
 
 
 
 server = ['src/server/mail.c', 'src/server/main.c', 'src/server/monitor.c', 'src/server/plugins.c']
 if host_system == 'windows'
-   sysdepargs += ['-DWIN32']
-   server += ['src/server/win32-libgkrellmd.c', 'src/server/win32-plugin.c']
+   swinrsc = windows.compile_resources('src/server/win32-resource.rc')
+   server += swinrsc
+   server += ['src/server/win32-plugin.c']
+   libgkrellmd = static_library('gkrellmd', 'src/server/win32-libgkrellmd.c',
+                                c_args : serverargs + debugargs,
+                                dependencies : serverdeps)
 endif
 server += sysdepsrc
 
 #sharedh = include_directories('src/shared')
-shared = ['src/shared/log.c', 'src/shared/utils.c', 'src/sysdeps/core.c']
-
+shared = ['src/shared/utils.c', 'src/sysdeps/core.c', 'src/shared/log.c']
 
 clientargs += sysdepargs
 serverargs += sysdepargs
+if host_system == 'windows'
+   clientdeps += windeps
+   clientargs += ['-D_WIN32_WINNT=0x0501', '-DWINVER=0x0501', '-DWIN32_LEAN_AND_MEAN']
+   #clientlinks += ['-Wl,--dynamicbase', '-Wl,--nxcompat']
+   clientlinkwiths = libgkrellm
+   serverdeps += windeps
+   serverargs += ['-D_WIN32_WINNT=0x0501', '-DWINVER=0x0501', '-DWIN32_LEAN_AND_MEAN']
+   #serverlinks += ['-Wl,--dynamicbase', '-Wl,--nxcompat']
+   serverlinkwiths = libgkrellmd
+endif
+
+server += shared
+src += shared
 
 buildserver = true
 #buildclient = false
 
 if buildclient
    client = executable('gkrellm', 
-                       shared + src, 
+                       src, 
                        dependencies : clientdeps,
-                       c_args : clientargs + debugargs)
+                       c_args : clientargs + debugargs,
+                       link_args : clientlinks,
+                       link_with : clientlinkwiths,
+                       win_subsystem : 'windows')
 endif
 if buildserver
-    server = executable('gkrellmd',
-                        shared + server,
+    daemon = executable('gkrellmd',
+                        server,
                         dependencies : serverdeps,
-                        c_args : serverargs + debugargs)
+                        c_args : serverargs + debugargs,
+                        link_args : serverlinks,
+                        link_with : serverlinkwiths,
+                        win_subsystem : 'console')
 endif

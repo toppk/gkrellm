@@ -2084,9 +2084,17 @@ gkrellm_sys_setup_connect(void (*setup_func)())
 	_GK.sys_setup_func = setup_func;
 	}
 
+#if defined(WIN32) && 0
+INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
+    PSTR lpCmdLine, INT nCmdShow)
+	{
+           gint argc;
+           gchar **argv;
+#else
 gint
 main(gint argc, gchar **argv)
 	{
+#endif
 	gint						i;
 	gchar						*s;
 	enum GkrellmConnectResult	connect_result;

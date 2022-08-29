@@ -1,5 +1,6 @@
 # dev cmds
-meson --cross-file=mingw-cross.txt buildwine
+meson --cross-file=mingw32-cross.txt buildwine32
+meson --cross-file=mingw64-cross.txt buildwine64
 meson setup builddir
 ninja -C builddir
 

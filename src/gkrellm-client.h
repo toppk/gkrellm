@@ -32,9 +32,6 @@
 */
 
 
-#ifndef GKRELLM_H
-#define GKRELLM_H
-
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
 #endif
@@ -1059,6 +1056,3 @@ typedef struct _GkrellmMonitor
 
 
 #include "gkrellm-public-proto.h"
-
-#endif // GKRELLM_H
-

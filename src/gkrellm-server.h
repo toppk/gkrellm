@@ -30,9 +30,6 @@
 |  shall include the source code for the parts of OpenSSL used as well
 |  as that of the covered work.
 */
-#ifndef GKRELLMD_H
-#define GKRELLMD_H
-
 #include "shared/log.h"
 
 #include <glib.h>
@@ -222,5 +219,3 @@ gint		gkrellmd_send_to_client(GkrellmdClient *client, gchar *buf);
 void		gkrellmd_add_mailbox(gchar *);
 GkrellmdTicks *gkrellmd_ticks(void);
 gint		gkrellmd_get_timer_ticks(void);
-
-#endif // GKRELLMD_H
