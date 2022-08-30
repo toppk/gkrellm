@@ -567,7 +567,7 @@ client_net_setup(gchar *line)
 
 
 /* ================================================================= */
-#include "../inet.h"
+#include "../sysdeps/inet.h"
 
 static GList	*inet_list;
 

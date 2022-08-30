@@ -550,7 +550,7 @@ solaris_list_harddisks(void) {
 /* ===================================================================== */
 /* Inet monitor interface */
 
-#include "../inet.h"
+#include "inet.h"
 
 #include <stropts.h>
 #include <inet/mib2.h>

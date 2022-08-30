@@ -557,7 +557,7 @@ gkrellm_sys_disk_init(void)
 /* ===================================================================== */
 /* Inet monitor interface */
 
-#include "../inet.h"
+#include "inet.h"
 
 #if defined(INET6)
 #include <netinet6/ip6_var.h>

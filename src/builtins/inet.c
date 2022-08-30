@@ -34,7 +34,7 @@
 #include "../gkrellm.h"
 #include "../gkrellm-private.h"
 #include "../gkrellm-sysdeps.h"
-#include "../inet.h"
+#include "../sysdeps/inet.h"
 
 typedef struct
 	{

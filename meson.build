@@ -154,11 +154,10 @@ builtins = ['src/builtins/battery.c', 'src/builtins/clock.c', 'src/builtins/cpu.
             'src/builtins/uptime.c']
 # client
 # common
-src = ['src/client/alerts.c', 'src/client/base64.c', 'src/client/chart.c',
-       'src/client/client.c', 'src/client/config.c', 'src/client/deprecated.c',
-       'src/client/gui.c', 'src/client/krell.c', 'src/client/main.c',
-       'src/client/panel.c', 'src/client/pixops.c', 'src/client/plugins.c',
-       'src/client/utils-client.c']
+src = ['src/client/alerts.c', 'src/client/chart.c', 'src/client/client.c',
+       'src/client/config.c', 'src/client/gui.c', 'src/client/krell.c',
+       'src/client/main.c', 'src/client/panel.c', 'src/client/pixops.c',
+       'src/client/plugins.c', 'src/client/utils-client.c']
 
 src += builtins
 # gui (+extras for windows)
@@ -169,7 +168,7 @@ if host_system == 'windows'
                                c_args : clientargs + debugargs,
                                dependencies : clientdeps)
    src += ['src/client/winops-win32.c', 'src/client/win32-plugin.c']
-   src += ['src/client/md5c.c']
+   src += ['src/shared/md5c.c']
 elif host_system == 'darwin'
    src += ['src/client/winops-gtk-mac.c']
 else
@@ -193,7 +192,7 @@ endif
 server += sysdepsrc
 
 #sharedh = include_directories('src/shared')
-shared = ['src/shared/utils.c', 'src/sysdeps/core.c', 'src/shared/log.c']
+shared = ['src/shared/base64.c', 'src/sysdeps/core.c', 'src/shared/log.c', 'src/shared/utils.c']
 
 clientargs += sysdepargs
 serverargs += sysdepargs

@@ -40,7 +40,7 @@
 
 #if defined(__OpenBSD__) || ( defined(__NetBSD__) && __NetBSD_Version__ < 399000100 )
 
-#include "../inet.h"
+#include "inet.h"
 
 /* NO IPv6 SUPPORT YET */
 #include <net/route.h>

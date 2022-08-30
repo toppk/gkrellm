@@ -628,7 +628,7 @@ init_disk_monitor(void)
 	}
 
 /* ======================================================= */
-#include "../inet.h"
+#include "../sysdeps/inet.h"
 
 typedef struct
 	{

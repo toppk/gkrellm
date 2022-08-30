@@ -756,7 +756,7 @@ gkrellm_sys_disk_order_from_name(const gchar *name)
 
 #if __NetBSD_Version__ >= 399000100
 
-#include "../inet.h"
+#include "inet.h"
 
 #include <errno.h>
 #include <sys/socket.h>

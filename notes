@@ -1,10 +1,27 @@
-# dev cmds
-meson --cross-file=mingw32-cross.txt buildwine32
-meson --cross-file=mingw64-cross.txt buildwine64
-meson setup builddir
-ninja -C builddir
+# status
 
+* gkrellm/gkrellmd works on modern linux
+* gkrellm/gkrellmd compiles on windows10, only gkrellmd works
+  (possible dll issues)
+* removed deprecated functions
 
-# docs
+# notes
 * gtop plugin was written against very old versions of libgtop
 * removed some logic for sensors/gkrellm_sys_sensors_mbmon_check in sysdeps-unix.c
+
+
+# dev cmds
+
+Build for 32-bit windows (cross compilation)
+   # meson --cross-file=mingw32-cross.txt buildwine32
+   # ninja -C buildwine32
+Build for 64-bit windows (cross compilation)
+   # meson --cross-file=mingw64-cross.txt buildwine64
+   # ninja -C buildwine64
+Build for native platform
+   # meson setup builddir
+   # ninja -C builddir
+Generate doxygen documentation
+   # doxygen doxygen.conf
+
+

@@ -108,7 +108,7 @@ static struct gcry_thread_cbs gk_gcry_threads_glib = {
 #if defined(HAVE_MD5_H)
 #include <md5.h>
 #else
-#include "md5.h"
+#include "../shared/md5.h"
 #endif
 #endif
 #endif

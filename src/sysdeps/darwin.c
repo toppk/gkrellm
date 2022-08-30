@@ -527,7 +527,7 @@ gkrellm_sys_disk_cleanup(void)
 /* ===================================================================== */
 /* Inet monitor interface */
 
-#include "../inet.h"
+#include "inet.h"
 
 #include <net/route.h>
 #include <netinet/in.h>

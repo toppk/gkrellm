@@ -895,7 +895,7 @@ gkrellm_sys_proc_init(void)
 /* ===================================================================== */
 /* Inet monitor interface */
 
-#include "../inet.h"
+#include "inet.h"
 
 #define	PROC_NET_TCP_FILE	"/proc/net/tcp"
 #define	PROC_NET_UDP_FILE	"/proc/net/udp"

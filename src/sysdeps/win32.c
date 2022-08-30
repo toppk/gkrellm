@@ -39,7 +39,7 @@
 #include "../gkrellm-private.h"
 #include "../gkrellm-sysdeps.h"
 
-#include "../inet.h" // For struct ActiveTCP
+#include "inet.h" // For struct ActiveTCP
 #include "../win32-plugin.h"
 
 

@@ -35,7 +35,7 @@
 #include "../gkrellm-private.h"
 #include "../shared/log-private.h"
 
-#include "../inet.h" // for INET6 define
+#include "../sysdeps/inet.h" // for INET6 define
 
 #if !defined(WIN32)
 	#include <syslog.h>
