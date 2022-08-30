@@ -147,14 +147,20 @@ elif host_system == 'linux'
    sysdepargs += ['-DSENSORS_COMMON']
 endif
 
-
+builtins = ['src/builtins/battery.c', 'src/builtins/clock.c', 'src/builtins/cpu.c',
+            'src/builtins/disk.c', 'src/builtins/fs.c', 'src/builtins/hostname.c',
+            'src/builtins/inet.c', 'src/builtins/mail.c', 'src/builtins/mem.c',
+            'src/builtins/net.c', 'src/builtins/proc.c', 'src/builtins/sensors.c',
+            'src/builtins/uptime.c']
 # client
 # common
-src = ['src/client/alerts.c', 'src/client/base64.c', 'src/client/battery.c', 'src/client/chart.c', 'src/client/client.c',
-       'src/client/clock.c', 'src/client/config.c', 'src/client/cpu.c', 'src/client/deprecated.c', 'src/client/disk.c',
-       'src/client/fs.c', 'src/client/gui.c', 'src/client/hostname.c', 'src/client/inet.c', 'src/client/krell.c', 'src/client/mail.c',
-       'src/client/main.c', 'src/client/mem.c', 'src/client/net.c', 'src/client/panel.c', 'src/client/pixops.c',
-       'src/client/plugins.c', 'src/client/proc.c', 'src/client/sensors.c', 'src/client/utils-client.c', 'src/client/uptime.c']
+src = ['src/client/alerts.c', 'src/client/base64.c', 'src/client/chart.c',
+       'src/client/client.c', 'src/client/config.c', 'src/client/deprecated.c',
+       'src/client/gui.c', 'src/client/krell.c', 'src/client/main.c',
+       'src/client/panel.c', 'src/client/pixops.c', 'src/client/plugins.c',
+       'src/client/utils-client.c']
+
+src += builtins
 # gui (+extras for windows)
 if host_system == 'windows'
    cwinrsc = windows.compile_resources('src/client/win32-resource.rc')

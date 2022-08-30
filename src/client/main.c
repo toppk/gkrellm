@@ -164,7 +164,7 @@ load_font(gchar *font_string, PangoFontDescription **gk_font,
 	}
 
 static void
-setup_fonts()
+setup_fonts(void)
 	{
 	load_font(_GK.large_font_string, &_GK.large_font, fail_large_font);
 	load_font(_GK.normal_font_string, &_GK.normal_font, fail_normal_font);
@@ -193,7 +193,7 @@ gkrellm_map_color_string(gchar *color_string, GdkColor *color)
 	}
 
 static void
-setup_colors()
+setup_colors(void)
 	{
 	GtkWidget	*win	= top_window;
 
@@ -1872,7 +1872,7 @@ gkrellm_monitor_vbox(void)
 	}
 
 void
-gkrellm_build()
+gkrellm_build(void)
 	{
 	GkrellmMonitor		*mon;
 	GList		*list;
