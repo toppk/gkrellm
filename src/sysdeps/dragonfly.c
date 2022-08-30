@@ -1,25 +1,14 @@
+// SPDX-License-Identifier: GPL-3.0-or-later WITH GPL-3.0-linking-source-exception
+
 /* GKrellM
 |  Copyright (C) 1999-2019 Bill Wilson
 |
-|  Author:  Bill Wilson    bill@gkrellm.net
-|  Latest versions might be found at:  http://gkrellm.net
+|  Author:  Bill Wilson    billw@gkrellm.net
 |
 |  DragonFly code: Joerg Sonnenberger <joerg@bec.de>
 |  Derived from FreeBSD code: Hajimu UMEMOTO <ume@FreeBSD.org>
 |
-|  This program is free software which I release under the GNU General Public
-|  License. You may redistribute and/or modify this program under the terms
-|  of that license as published by the Free Software Foundation; either
-|  version 2 of the License, or (at your option) any later version.
-|
-|  This program is distributed in the hope that it will be useful,
-|  but WITHOUT ANY WARRANTY; without even the implied warranty of
-|  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-|  GNU General Public License for more details.  Version 2 is in the
-|  COPYRIGHT file in the top level directory of this distribution.
-| 
-|  To get a copy of the GNU General Puplic License, write to the Free Software
-|  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+|  Latest versions might be found at:  http://gkrellm.net
 */
 
 #include <kvm.h>

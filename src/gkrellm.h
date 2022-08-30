@@ -1,4 +1,12 @@
+// SPDX-License-Identifier: GPL-3.0-or-later WITH GPL-3.0-linking-source-exception
 
+/* GKrellM
+|  Copyright (C) 1999-2019 Bill Wilson
+|
+|  Author:  Bill Wilson    billw@gkrellm.net
+|
+|  Latest versions might be found at:  http://gkrellm.net
+*/
 
 #ifndef GKRELLM_H
 #define GKRELLM_H
