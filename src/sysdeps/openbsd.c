@@ -2,15 +2,22 @@
 
 /* GKrellM
 |  Copyright (C) 1999-2019 Bill Wilson
-|
+|  
 |  Author:  Bill Wilson    billw@gkrellm.net
 |
 |  OpenBSD code derived from FreeBSD code by: Hajimu UMEMOTO <ume@FreeBSD.org>
+|  bsd-net-open.c code is Copyright (C):
+|         Anthony Mallet <anthony.mallet@useless-ficus.net>
+|
 |
 |  Latest versions might be found at:  http://gkrellm.net
 */
 
 #include <kvm.h>
+
+#include "../gkrellm.h"
+#include "../gkrellm-private.h"
+#include "../gkrellm-sysdeps.h"
 
 kvm_t	*kvmd = NULL;
 char	errbuf[_POSIX2_LINE_MAX];
@@ -39,85 +46,95 @@ gkrellm_sys_main_cleanup(void)
 /* ===================================================================== */
 /* CPU monitor interface */
 
-#include <sys/dkstat.h>
-#include <kvm.h>
+#include <sys/sysctl.h>
+#include <sys/sched.h>
 
-extern	kvm_t	*kvmd;
+static gint ncpus;
+
+static gint get_ncpus(void);
 
 void
 gkrellm_sys_cpu_read_data(void)
 	{
-	long		cp_time[CPUSTATES];
-	static struct nlist nl[] = {
-#define N_CP_TIME	0
-		{ "_cp_time" },
-		{ "" }
-	};
+	int64_t	cp_time[ncpus][CPUSTATES];
+	size_t size;
+	int i;
 
+	size = sizeof(cp_time[0]);
+	if (ncpus > 1) {
+		for (i = 0; i < ncpus; i++) {
+			int cp_time_mib[] = {CTL_KERN, KERN_CPTIME2, i};
 
-	if (kvmd == NULL)
-		return;
-	if (nl[0].n_type == 0)
-		if (kvm_nlist(kvmd, nl) < 0 || nl[0].n_type == 0)
+			if (sysctl(cp_time_mib, 3, cp_time[i], &size, NULL, 0)
+			    < 0)
+				continue;
+
+			gkrellm_cpu_assign_data(i, cp_time[i][CP_USER],
+			    cp_time[i][CP_NICE], cp_time[i][CP_SYS],
+			    cp_time[i][CP_IDLE]);
+		}
+	} else {
+		int cp_time_mib[] = {CTL_KERN, KERN_CPTIME};
+		long cp_time_tmp[CPUSTATES];
+
+		if (sysctl(cp_time_mib, 2, cp_time_tmp, &size, NULL, 0) < 0)
 			return;
-	if (kvm_read(kvmd, nl[N_CP_TIME].n_value,
-		     (char *)&cp_time, sizeof(cp_time)) != sizeof(cp_time))
-		return;
+		for (i = 0; i < CPUSTATES; i++)
+			cp_time[0][i] = cp_time_tmp[i];
 
-	/* Currently, SMP is not supported */
-	gkrellm_cpu_assign_data(0, cp_time[CP_USER], cp_time[CP_NICE],
-				cp_time[CP_SYS], cp_time[CP_IDLE]);
+		gkrellm_cpu_assign_data(0, cp_time[0][CP_USER],
+		    cp_time[0][CP_NICE], cp_time[0][CP_SYS],
+		    cp_time[0][CP_IDLE]);
+
 	}
+}
 
 gboolean
 gkrellm_sys_cpu_init(void)
-    {
-	gkrellm_cpu_set_number_of_cpus(1);
+{
+	ncpus = get_ncpus();
+	gkrellm_cpu_set_number_of_cpus(ncpus);
 	return TRUE;
-	}
+}
 
+static gint
+get_ncpus(void)
+{
+	static int mib[] = { CTL_HW, HW_NCPU };
+	int ncpus;
+	size_t size = sizeof(int);
+
+	if (sysctl(mib, 2, &ncpus, &size, NULL, 0) < 0)
+		return 1;
+	else
+		return ncpus;
+}
 
 /* ===================================================================== */
 /* Proc monitor interface */
 
-#include <sys/proc.h>
 #include <sys/sysctl.h>
-#include <uvm/uvm_extern.h>
-#include <kvm.h>
+#include <sys/vmmeter.h>
 
 #include <utmp.h>
-
-extern	kvm_t	*kvmd;
 
 void
 gkrellm_sys_proc_read_data(void)
 {
-   static int mib[] = { CTL_KERN, KERN_PROC, KERN_PROC_ALL };
+   static int proc_mib[] = { CTL_KERN, KERN_PROC, KERN_PROC_ALL };
+   static int fork_mib[] = { CTL_KERN, KERN_FORKSTAT };
    double avenrun;
 	guint	n_forks = 0, n_processes = 0;
-   struct uvmexp *uvmexp;
-   int i;
    size_t len;
+   struct forkstat forkstat;
 
-	static struct nlist nl[] = {
-#define X_UVM_EXP    0
-	   { "_uvmexp" },
-	   { NULL }
-	};
-
-
-   if (sysctl(mib, 3, NULL, &len, NULL, 0) >= 0) {
+   if (sysctl(proc_mib, 3, NULL, &len, NULL, 0) >= 0) {
       n_processes = len / sizeof(struct kinfo_proc);
    }
 
-   /* get name list if it is not done yet */
-   if (kvmd == NULL) return;
-   if (nl[0].n_type == 0) kvm_nlist(kvmd, nl);
-
-   if (nl[0].n_type != 0) {
-      uvmexp = (struct uvmexp *)nl[X_UVM_EXP].n_value;
-      if (kvm_read(kvmd, (u_long)&uvmexp->forks, &i, sizeof(i)) == sizeof(i))
-	 n_forks = i;
+   len = sizeof(forkstat);
+   if (sysctl(fork_mib, 2, &forkstat, &len, NULL, 0) >= 0) {
+      n_forks = forkstat.cntfork + forkstat.cntvfork;
    }
 
    if (getloadavg(&avenrun, 1) <= 0)
@@ -164,7 +181,6 @@ gkrellm_sys_proc_init(void)
 #include <sys/vmmeter.h>
 #include <sys/sysctl.h>
 #include <uvm/uvm_extern.h>
-#include <kvm.h>
 
 static gulong	swapin,
 				swapout;
@@ -174,31 +190,21 @@ static guint64	swap_total,
 void
 gkrellm_sys_mem_read_data(void)
 {
-   static int mib[] = { CTL_VM, VM_METER };
+   static int vmtotal_mib[] = { CTL_VM, VM_METER };
+   static int uvmexp_mib[] = { CTL_VM, VM_UVMEXP };
    static int pgout, pgin;
    unsigned long	total, used, x_used, free, shared, buffers, cached;
    struct vmtotal vmt;
    struct uvmexp uvmexp;
    size_t len;
-   static struct nlist nl[] = {
-#define X_UVM_EXP    0
-   { "_uvmexp" },
-   { NULL }
-};
 
-
-   if (kvmd == NULL) return;
-
-   /* get the name list if it's not done yet */
-   if (nl[0].n_type == 0) kvm_nlist(kvmd, nl);
-
-   if (nl[0].n_type != 0)
-      if (kvm_read(kvmd, nl[X_UVM_EXP].n_value,
-		   &uvmexp, sizeof(uvmexp)) != sizeof(uvmexp))
-	 memset(&uvmexp, 0, sizeof(uvmexp));
-
-   if (sysctl(mib, 2, &vmt, &len, NULL, 0) < 0)
+   len = sizeof(vmt);
+   if (sysctl(vmtotal_mib, 2, &vmt, &len, NULL, 0) < 0)
       memset(&vmt, 0, sizeof(vmt));
+
+   len = sizeof(uvmexp);
+   if (sysctl(uvmexp_mib, 2, &uvmexp, &len, NULL, 0) < 0)
+      memset(&uvmexp, 0, sizeof(uvmexp));
 
    total = (uvmexp.npages - uvmexp.wired) << uvmexp.pageshift;
 
@@ -217,8 +223,8 @@ gkrellm_sys_mem_read_data(void)
    gkrellm_mem_assign_data(total, used, free, shared, buffers, cached);
 
    /* show only the pages located on the disk and not in memory */
-   swap_total = (guint64) (uvmexp.swpages << uvmexp.pageshift);
-   swap_used = (guint64) (uvmexp.swpgonly << uvmexp.pageshift);
+   swap_total = (guint64)uvmexp.swpages << uvmexp.pageshift;
+   swap_used = (guint64)uvmexp.swpgonly << uvmexp.pageshift;
 
    /* For page in/out operations, uvmexp struct doesn't seem to be reliable */
 
@@ -248,41 +254,125 @@ gkrellm_sys_mem_init(void)
 
 
 /* ===================================================================== */
-/* Sensor monitor interface - not implemented */
+/* Sensor monitor interface */
+
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#include <sys/sensors.h>
+#include <errno.h>
+
+static gboolean
+get_sensor(int dev, int type, int num, gfloat *val)
+{
+	int mib[5] = { CTL_HW, HW_SENSORS };
+	struct sensor sen;
+	size_t len = sizeof(sen);
+
+	mib[2] = dev;
+	mib[3] = type;
+	mib[4] = num;
+	if (sysctl(mib, 5, &sen, &len, NULL, 0) == -1 ||
+	    (SENSOR_FINVALID|SENSOR_FUNKNOWN) & sen.flags)
+		return FALSE;
+
+	*val = (gfloat)sen.value;
+	return TRUE;
+}
 
 gboolean
 gkrellm_sys_sensors_get_temperature(gchar *device_name, gint id,
 		gint iodev, gint interface, gfloat *temp)
-	{
-	return FALSE;
-	}
+{
+	return get_sensor(id, iodev, interface, temp);
+}
 
 gboolean
 gkrellm_sys_sensors_get_fan(gchar *device_name, gint id,
 		gint iodev, gint interface, gfloat *fan)
-	{
-	return FALSE;
-	}
+{
+	return get_sensor(id, iodev, interface, fan);
+}
 
 gboolean
 gkrellm_sys_sensors_get_voltage(gchar *device_name, gint id,
 		gint iodev, gint interface, gfloat *volt)
-	{
-	return FALSE;
+{
+	return get_sensor(id, iodev, interface, volt);
+}
+
+static gboolean
+add_sensdev(int dev, struct sensordev *sensdev)
+{
+	static enum sensor_type stypes[] =
+		{ SENSOR_TEMP, SENSOR_FANRPM, SENSOR_VOLTS_DC };
+	static gint gtypes[] =
+		{ SENSOR_TEMPERATURE, SENSOR_FAN, SENSOR_VOLTAGE };
+	static gfloat fac[] = { 0.000001, 1.0, 0.000001 };
+	static gfloat off[] = { -273.15, 0.0, 0.0 };
+	char name[32];
+	int mib[5] = { CTL_HW, HW_SENSORS };
+	struct sensor sen;
+	size_t len = sizeof(sen);
+	int idx, num;
+	gboolean found = FALSE;
+
+	mib[2] = dev;
+	for (idx = 0; sizeof(stypes) / sizeof(stypes[0]) > idx; idx++) {
+		mib[3] = stypes[idx];
+		for (num = 0; sensdev->maxnumt[stypes[idx]] > num; num++) {
+			mib[4] = num;
+			len = sizeof(sen);
+			if (sysctl(mib, 5, &sen, &len, NULL, 0) == -1) {
+				if (ENOENT != errno)
+					return FALSE;
+				continue;
+			}
+			if (SENSOR_FINVALID & sen.flags)
+				continue;
+			snprintf(name, sizeof(name), "%s.%s%d", sensdev->xname,
+			    sensor_type_s[stypes[idx]], num);
+			gkrellm_sensors_add_sensor(gtypes[idx], NULL, name,
+			    sensdev->num, stypes[idx], num, fac[idx],
+			    off[idx], NULL, (sen.desc[0] ? sen.desc : NULL));
+			found = TRUE;
+		}
 	}
+
+	return found;
+}
 
 gboolean
 gkrellm_sys_sensors_init(void)
-	{
-	return FALSE;
+{
+	int mib[3] = { CTL_HW, HW_SENSORS };
+	struct sensordev sensdev;
+	size_t len = sizeof(sensdev);
+	int dev;
+	gboolean found = FALSE;
+
+#define GKRELLM_MAXSENSORDEVICES 1024
+	for (dev = 0; GKRELLM_MAXSENSORDEVICES > dev; dev++) {
+		mib[2] = dev;
+		if (sysctl(mib, 3, &sensdev, &len, NULL, 0) == -1) {
+			if (errno == ENXIO)
+				continue;
+			if (errno == ENOENT)
+				break;
+			return FALSE;
+		}
+		if (add_sensdev(dev, &sensdev))
+			found = TRUE;
 	}
+
+	return found;
+}
 
 
 /* ===================================================================== */
 /* Battery monitor interface */
 #include <sys/ioctl.h>
 
-#if defined(__i386__) || defined(__powerpc__)
+#if defined(__i386__) || defined(__macppc__) || defined(__amd64__) || defined(__arm__) || defined(__sparc__) || defined(__sparc64__)
 
 #include <machine/apmvar.h>
 #define	APMDEV		"/dev/apm"
@@ -334,23 +424,9 @@ gkrellm_sys_battery_init()
 /* ===================================================================== */
 /* Disk monitor interface */
 
-#include <sys/dkstat.h>
+#include <sys/sysctl.h>
 #include <sys/disk.h>
-#include <kvm.h>
-
-static struct nlist nl_disk[] = {
-#define X_DISK_COUNT    0
-   { "_disk_count" },      /* number of disks */
-#define X_DISKLIST      1
-   { "_disklist" },        /* TAILQ of disks */
-   { NULL },
-};
-
-static struct disk *dkdisks;	/* kernel disk list head */
-
-extern	kvm_t	*kvmd;
-
-static gint	n_disks;
+#include <errno.h>
 
 gchar *
 gkrellm_sys_disk_name_from_device(gint device_number, gint unit_number,
@@ -366,68 +442,122 @@ gkrellm_sys_disk_order_from_name(const gchar *name)
 	}
 
 
+static int
+get_diskinfo(struct diskstats **ret)
+{
+	static int mib[] = { CTL_HW, HW_DISKSTATS };
+	static void *buf = NULL;
+	static size_t buflen = 0;
+	size_t len;
+	void *newbuf;
+
+	for (;;) {
+		len = buflen;
+		if (NULL != buf) {
+			if (sysctl(mib, 2, buf, &len, NULL, 0) >= 0) {
+				*ret = buf;
+				return len / sizeof(struct diskstats);
+			}
+			if (ENOMEM != errno)
+				return (-1);
+		}
+
+		if (sysctl(mib, 2, NULL, &len, NULL, 0) < 0)
+			return (-1);
+		len += sizeof(struct diskstats);
+		if (NULL == (newbuf = realloc(buf, len)))
+			return (-1);
+		buf = newbuf;
+		buflen = len;
+	}
+}
+
 void
 gkrellm_sys_disk_read_data(void)
 {
-   struct disk	d, *p;
-   gint			i;
-   char			buf[20];
-   guint64		rbytes, wbytes;
+	int diskcount, ii;
+	struct diskstats *disks;
 
-   if (kvmd == NULL) return;
-   if (n_disks <= 0) return;		/* computed by register_disks() */
-   if (nl_disk[0].n_type == 0) return;	/* ditto. */
-
-   for (i = 0, p = dkdisks; i < n_disks; p = d.dk_link.tqe_next, ++i)
-	{
-	if (kvm_read(kvmd, (u_long)p, &d, sizeof(d)) == sizeof(d))
-		{
-		if (kvm_read(kvmd, (u_long)d.dk_name, buf, sizeof(buf)) != sizeof(buf))
-			/* fallback to default name if kvm_read failed */
-			sprintf(buf, "%s%c", _("Disk"), 'A' + i);
-	 
-		/* It seems impossible to get the read and write transfers
-		 * separately. Its just a matter of choice to put the total in
-		 * the rbytes member but I like the blue color so much.
-		*/
-
-		/* Separate read/write stats were implemented in NetBSD 1.6K.
-		*/
-
-#if __NetBSD_Version__ >= 106110000
-		rbytes = d.dk_rbytes;
-		wbytes = d.dk_wbytes;
-#else
-		rbytes = d.dk_bytes;
-		wbytes = 0;
-#endif
-
-		gkrellm_disk_assign_data_by_name(buf, rbytes, wbytes);
-		}
-	}
+	diskcount = get_diskinfo(&disks);
+	for (ii = 0; diskcount > ii; ii++)
+		gkrellm_disk_assign_data_by_name(disks[ii].ds_name,
+		    disks[ii].ds_rbytes, disks[ii].ds_wbytes, FALSE);
 }
 
 gboolean
 gkrellm_sys_disk_init(void)
 {
-   struct disklist_head head;
+	return TRUE;
+}
 
+/* ===================================================================== */
+/* Inet monitor interface */
 
-   if (kvmd == NULL) return FALSE;
+#include "inet.h"
 
-   /* get disk count */
-   if (kvm_nlist(kvmd, nl_disk) >= 0 && nl_disk[0].n_type != 0)
-      if (kvm_read(kvmd, nl_disk[X_DISK_COUNT].n_value,
-		   (char *)&n_disks, sizeof(n_disks)) != sizeof(n_disks))
-	 n_disks = 0;
+/* NO IPv6 SUPPORT YET */
+#include <net/route.h>
+#include <netinet/in_systm.h>
+#include <netinet/ip.h>
+#include <netinet/in_pcb.h>
 
-   /* get first disk */
-   if (n_disks > 0) {
-      if (kvm_read(kvmd, nl_disk[X_DISKLIST].n_value, 
-		   &head, sizeof(head)) != sizeof(head))
-	 n_disks = 0;
+#include <netinet/ip_var.h>
+#include <netinet/tcp.h>
+#include <netinet/tcp_seq.h>
+#include <netinet/tcp_fsm.h>
+#include <netinet/tcp_timer.h>
+#include <netinet/tcp_var.h>
 
-      dkdisks = head.tqh_first;
-   }
-   return TRUE;
+#include <kvm.h>
+
+extern kvm_t *kvmd;
+
+void gkrellm_sys_inet_read_tcp_data(void)
+{
+	ActiveTCP tcp;
+	gint tcp_status;
+	struct inpcbtable table;
+	struct inpcb inpcb, *next;
+	struct tcpcb tcpcb;
+	static struct nlist nl[] = {
+#define X_TCBTABLE 0
+		{"_tcbtable"},
+		{NULL}};
+
+	if (kvmd == NULL)
+		return;
+	if (nl[0].n_type == 0)
+		if (kvm_nlist(kvmd, nl) < 0 || nl[0].n_type == 0)
+			return;
+
+	if (kvm_read(kvmd, nl[X_TCBTABLE].n_value, (char *)&table,
+				 sizeof(struct inpcbtable)) != sizeof(struct inpcbtable))
+		return;
+
+	next = TAILQ_FIRST(&table.inpt_queue);
+	while (next != NULL)
+	{
+		if (kvm_read(kvmd, (u_long)next,
+					 (char *)&inpcb, sizeof(inpcb)) == sizeof(inpcb) &&
+			kvm_read(kvmd, (u_long)inpcb.inp_ppcb,
+					 (char *)&tcpcb, sizeof(tcpcb)) == sizeof(tcpcb))
+		{
+
+			tcp.local_port = ntohs(inpcb.inp_lport);
+			tcp.remote_addr.s_addr = inpcb.inp_faddr.s_addr;
+			tcp.remote_port = ntohs(inpcb.inp_fport);
+			tcp_status = (tcpcb.t_state == TCPS_ESTABLISHED);
+			tcp.family = AF_INET;
+			if (tcp_status == TCP_ALIVE)
+				gkrellm_inet_log_tcp_port_data(&tcp);
+		}
+
+		next = TAILQ_NEXT(&inpcb, inp_queue);
+	}
+}
+
+gboolean
+gkrellm_sys_inet_init(void)
+{
+	return TRUE;
 }

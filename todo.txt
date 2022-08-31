@@ -1,7 +1,8 @@
 * charts to cairo
 * working on gtk3
 * nls/translation (enabled, packaged, up2date)
-* optional libraries (sensors ntlm gnutls openssl gtop etc?)
+* optional libraries (sensors ntlm gnutls openssl libressl gtop etc?)
+  - no extra library searching for platforms
 * no deprecations on gtk3
 * windows/macos/freebsd sysdeps
 * wayland/no-X11
@@ -12,6 +13,8 @@
 * apis for daemon
 * transparency
 * gtk4
+  - G_ENABLE_DIAGNOSTIC=1
+  - https://gitlab.gnome.org/GNOME/gtk/-/blob/main/docs/reference/gtk/migrating-3to4.md
 * new readfile on linux
 * D_FORTIFY_SOURCES=N
 * clang / https://clang-analyzer.llvm.org/scan-build.html
@@ -29,4 +32,7 @@
 * client/sensors.c has some sysdep interface functions should be in
   systems/sensors-common.c
 * move to meson: HAVE_GETADDRINFO
+* missing platforms gtop supported?
+* port solaris to 64bit (replace swapctl with kstat?)
 * clean up md5
+* clean up ssl

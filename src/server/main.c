@@ -156,15 +156,15 @@ static void gkrellmd_syslog_log(GLogLevelFlags log_level, const gchar *message)
 	int facility_priority;
 
 	// default to info and override with other states if they are more important
-	facility_priority = LOG_MAKEPRI(LOG_DAEMON, LOG_INFO);
+	facility_priority = (LOG_DAEMON | LOG_INFO);
 	if (log_level & G_LOG_LEVEL_DEBUG)
-		facility_priority = LOG_MAKEPRI(LOG_DAEMON, LOG_DEBUG);
+		facility_priority = (LOG_DAEMON | LOG_DEBUG);
 	if (log_level & G_LOG_LEVEL_WARNING)
-		facility_priority = LOG_MAKEPRI(LOG_DAEMON, LOG_WARNING);
+		facility_priority = (LOG_DAEMON | LOG_WARNING);
 	if (log_level & G_LOG_LEVEL_ERROR)
-		facility_priority = LOG_MAKEPRI(LOG_DAEMON, LOG_ERR);
+		facility_priority = (LOG_DAEMON | LOG_ERR);
 	if (log_level & G_LOG_LEVEL_CRITICAL)
-		facility_priority = LOG_MAKEPRI(LOG_DAEMON, LOG_CRIT);
+		facility_priority = (LOG_DAEMON | LOG_CRIT);
 
 	syslog(facility_priority, "%s", message);
 #endif // defined(WIN32)
@@ -1134,6 +1134,11 @@ drop_privileges(void)
 	{
 #if !defined(WIN32)
 	int r;
+       if (geteuid() != 0)
+               {
+               g_warning("Ignoring user/group as you are running as non-root\n");
+		return 0;
+               }
 	if (drop_privs.gid > (uid_t)0)
 		{
 		r = setgroups((size_t)0, (gid_t*)0);
@@ -1216,7 +1221,7 @@ gkrellmd_run(gint argc, gchar **argv)
 
 	make_pidfile();
 	gkrellm_sys_main_init();
-	if (drop_privileges() != 0)
+       if (drop_privileges() != 0)
 		{
 		g_warning("Failed to drop privileges: %s\n", strerror(errno));
 		gkrellm_sys_main_cleanup();
@@ -1687,16 +1692,16 @@ int main(int argc, char* argv[])
 	if (install_path != NULL)
 		{
 	    locale_dir = g_build_filename(install_path, LOCALEDIR, NULL);
-		bindtextdomain(PACKAGE_D, locale_dir);
+		bindtextdomain(PACKAGE, locale_dir);
 		g_free(locale_dir);
 	    g_free(install_path);
 		}
 #else
-	bindtextdomain(PACKAGE_D, LOCALEDIR);
+	bindtextdomain(PACKAGE, LOCALEDIR);
 #endif /* !WIN32 */
 #endif /* LOCALEDIR */
-	textdomain(PACKAGE_D);
-	bind_textdomain_codeset(PACKAGE_D, "UTF-8");
+	textdomain(PACKAGE);
+	bind_textdomain_codeset(PACKAGE, "UTF-8");
 #endif	/* ENABLE_NLS */
 
 	// Init logging-chain

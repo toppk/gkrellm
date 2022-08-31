@@ -14,6 +14,11 @@
 #include <kvm.h>
 #include <fcntl.h>
 
+#include "../gkrellm.h"
+#include "../gkrellm-private.h"
+#include "../gkrellm-sysdeps.h"
+
+#undef _FILE_OFFSET_BITS // needed until we stop using swapctl
 kstat_ctl_t *kc;
 kvm_t *kd = NULL;
 

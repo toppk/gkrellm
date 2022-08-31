@@ -394,7 +394,7 @@ gkrellm_start_timer(gint Hz)
 	}
 
 GtkWidget *
-gkrellm_get_top_window()
+gkrellm_get_top_window(void)
 	{
 	return top_window;
 	}

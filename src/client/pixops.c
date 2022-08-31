@@ -659,7 +659,7 @@ gkrellm_piximage_new_from_inline(const guint8 *data, gboolean copy_pixels)
 	width  = big_endian_uint(d + 16);
 	height = big_endian_uint(d + 20);
 
-#if defined(WIN32)
+#if defined(MISSING_MEMDUP2)
 	pixels = g_memdup((gconstpointer)(d + 24), height * stride);
 #else
 	pixels = g_memdup2((gconstpointer)(d + 24), height * stride);

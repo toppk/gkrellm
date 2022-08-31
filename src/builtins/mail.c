@@ -17,10 +17,6 @@
 
 #include	"pixmaps/mail/decal_mail.xpm"
 
-#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
-#define HAVE_MD5_H
-#endif
-
 #if defined(HAVE_GNUTLS)
 #include <gnutls/openssl.h>
 
@@ -332,7 +328,7 @@ static gint		style_id;
 #ifndef HAVE_GNUTLS
 static GMutex		**ssl_locks;
 
-#if defined(OPENSSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER < 0x10100000L)
+#if defined(OPENSSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER < 0x10100000L) || defined(LIBRESSL_VERSION_NUMBER)
 static void
 ssl_locking_cb(int mode, int n, const char *file, int line)
 	{

@@ -1,9 +1,27 @@
 # status
 
-* gkrellm/gkrellmd works on modern linux
-* gkrellm/gkrellmd compiles on windows10, only gkrellmd works
-  (possible dll issues)
+* Linux:     Fedora 36     - gkrellm & gkrellmd working
+* FreeBSD:   Freebsd 13.1  - gkrellm & gkrellmd working
+* NetBSD:    NetBSD 9.3    - gkrellm & gkrellmd working
+* OpenBSD:   OpenBSD 7.1   - gkrellm & gkrellmd working
+* DragonFly: DragonFly 6.2 - gkrellm & gkrellmd working
+* SunsOS:    Tribblix 0m28 - gkrellm & gkrellmd working
+* Windows:   Windows 10    - gkrellm doesn't launch (possible dll issues),
+                             gkrellmd working
+
+# https://cvsweb.openbsd.org/cgi-bin/cvsweb/ports/sysutils/gkrellm/gkrellm/
+# https://cgit.freebsd.org/ports/tree/sysutils/gkrellm2
+# https://github.com/NetBSD/pkgsrc/tree/trunk/sysutils/gkrellm/
+# https://cdn.netbsd.org/pub/pkgsrc/current/pkgsrc/sysutils/gkrellm/index.html
+# https://pkgsrc.se/sysutils/gkrellm
+# https://gitweb.dragonflybsd.org/dports.git/tree/HEAD:/sysutils/gkrellm2
+
+# changes from upstream
+
 * removed deprecated functions
+* reorganized source tree
+* removed deprecated functions
+* moved build automation from make to meson+ninja
 
 # notes
 * gtop plugin was written against very old versions of libgtop

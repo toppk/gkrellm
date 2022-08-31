@@ -12,6 +12,10 @@
 |  Latest versions might be found at:  http://gkrellm.net
 */
 
+#include "../gkrellm.h"
+#include "../gkrellm-private.h"
+#include "../gkrellm-sysdeps.h"
+
 #if !(defined(__FreeBSD__) && __FreeBSD_version < 410000) && \
     !(defined(__NetBSD__) && __NetBSD_version < 105000000) && \
     !(defined(__OpenBSD__) && OpenBSD < 200006) && \
@@ -26,8 +30,8 @@
 #include <net/if.h>
 #include <ifaddrs.h>
 
-void
-gkrellm_sys_net_read_data(void)
+	void
+	gkrellm_sys_net_read_data(void)
 	{
 	struct ifaddrs		*ifap, *ifa;
 	struct if_data		*ifd;
@@ -41,9 +45,17 @@ gkrellm_sys_net_read_data(void)
 			{
 			if (ifa->ifa_addr->sa_family != AF_LINK)
 				continue;
-			ifd = (struct if_data *)ifa->ifa_data;
-			gkrellm_net_assign_data(ifa->ifa_name,
-					ifd->ifi_ibytes, ifd->ifi_obytes);
+#ifdef IFF_CANTCONFIG
+			if ((ifa->ifa_flags & IFF_CANTCONFIG) != 0)
+				continue;
+#endif
+
+				ifd = (struct if_data *)ifa->ifa_data;
+				if (ifd == NULL)
+					continue;
+
+				gkrellm_net_assign_data(ifa->ifa_name,
+										ifd->ifi_ibytes, ifd->ifi_obytes);
 			}
 		}
 
@@ -58,8 +70,7 @@ gkrellm_sys_net_read_data(void)
 #include <net/if_dl.h>
 #include <net/route.h>
 
-
-static int	mib_net[] = { CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST, 0 };
+	static int mib_net[] = {CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST, 0};
 static char	*buf;
 static int	alloc;
 
@@ -92,9 +103,11 @@ gkrellm_sys_net_read_data(void)
 	while (next < lim)
 		{
 		ifm = (struct if_msghdr *)next;
+		next += ifm->ifm_msglen;
+		if (ifm->ifm_version != RTM_VERSION)
+			continue;
 		if (ifm->ifm_type != RTM_IFINFO)
 			return;
-		next += ifm->ifm_msglen;
 
 		while (next < lim)
 			{

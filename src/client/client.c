@@ -29,39 +29,6 @@
 
 #include <errno.h>
 
-
-
-#if defined(__linux__)
-#define HAVE_GETADDRINFO	1
-#endif
-
-#if defined(__DragonFly__)
-#define HAVE_GETADDRINFO	1
-#endif
-
-#if defined(__FreeBSD__)
-#if __FreeBSD_version >= 400000
-#define HAVE_GETADDRINFO	1
-#endif
-#endif
-
-#if defined(__OpenBSD__)
-#define HAVE_GETADDRINFO	1
-#endif
-
-#if defined(__NetBSD__)
-#define HAVE_GETADDRINFO	1
-#endif
-
-#if defined(__solaris__)
-/* getaddrinfo is related to IPv6 stuff */
-# include <netconfig.h>
-# if defined(NC_INET6)
-#  define HAVE_GETADDRINFO	1
-# endif
-#endif
-
-
 typedef struct
 	{
 	gchar	*key;

@@ -20,6 +20,6 @@ option(
 option(
   'enable_nls',
   type : 'boolean',
-  value : 'false',
+  value : 'true',
   description : 'enable translations.'
 )

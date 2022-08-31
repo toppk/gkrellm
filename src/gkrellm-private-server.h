@@ -10,54 +10,6 @@
 
 #include "gkrellm-sysdeps.h"
 
-#if defined(WIN32)
-// Enable getaddrinfo on win32 if we target win xp or newer
-#if _WIN32_WINNT > 0x0500
-#define HAVE_GETADDRINFO	1
-#endif
-#endif
-
-#if defined(__linux__)
-#define HAVE_GETADDRINFO	1
-#endif
-
-#if defined(__DragonFly__)
-#define HAVE_GETADDRINFO	1
-#endif
-
-#if defined(__FreeBSD__)
-#include <sys/param.h>
-#if __FreeBSD_version >= 400000
-#define HAVE_GETADDRINFO	1
-#endif
-#endif
-
-#if defined(__OpenBSD__)
-#define HAVE_GETADDRINFO	1
-#endif
-
-#if defined(__NetBSD__)
-#define HAVE_GETADDRINFO	1
-#include <sys/param.h>
-#  if __NetBSD_Version__ <= 105010000
-#    define sa_family_t unsigned char
-#  endif
-#endif
-
-#if defined(__solaris__)
-# include <netconfig.h>
-# if defined(NC_INET6)
-#  define HAVE_GETADDRINFO	1
-# endif
-#endif
-
-#if defined(__APPLE__)
-# ifndef socklen_t
-#  define socklen_t int
-# endif
-#define HAVE_GETADDRINFO   1
-#endif
-
 #ifndef	NI_WITHSCOPEID
 #define	NI_WITHSCOPEID	0
 #endif

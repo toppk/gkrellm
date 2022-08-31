@@ -1601,7 +1601,7 @@ gkrellm_alert_pixbuf(void)
 		width  = big_endian_uint(data + 16);
 		height = big_endian_uint(data + 20);
 
-#if defined(WIN32)
+#if defined(MISSING_MEMDUP2)
 		pixels = g_memdup((gconstpointer)(data + 24), height * stride);
 #else
 		pixels = g_memdup2((gconstpointer)(data + 24), height * stride);

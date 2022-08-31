@@ -3,7 +3,7 @@ project(
        'c',
        version : run_command('cat', 'VERSION', check: true).stdout().strip(),
        license : 'GPL',
-       meson_version : '>= 0.62.2',
+       meson_version : '>= 0.61.1',
        default_options : []
 )
 
@@ -28,6 +28,18 @@ else
    libgtop = null_dep
 endif
 
+glib = dependency('glib-2.0', version : '>= 2.62.6', required : true)
+no_memdup2 = glib.version().version_compare('< 2.68.0') 
+gmodule = dependency('gmodule-2.0', version : '>= 2.62.6', required : true)
+
+
+openssl = dependency('openssl', version: '>= 1.1.1o', required : false)
+## Only use own md5-code if neither OpenSSL nor GnuTLS are present
+#ifneq ($(HAVE_SSL),1)
+#    EXTRAOBJS += md5c.o
+#endif
+
+
 enable_nls = get_option('enable_nls')
 
 if host_system == 'windows'
@@ -38,13 +50,69 @@ if host_system == 'windows'
    winwtsapi32 = cc.find_library('wtsapi32')
    winws2_32 = cc.find_library('ws2_32')
    windeps = [winws2_32, winwtsapi32, winpdh, winnetapi32, winiphlpapi, winintl]
+elif host_system == 'sunos'
+      devinfo = cc.find_library('devinfo', required : false)
+      md = cc.find_library('md', required : false)
+      kstat = cc.find_library('kstat', required : false)
+      kvm = cc.find_library('kvm', required : false)
+      socket = cc.find_library('socket', required : false)
+elif host_system == 'freebsd' or host_system == 'dragonfly' or\
+   host_system == 'netbsd' or host_system == 'openbsd'
+      devstat = cc.find_library('devstat', required : false)
+      md = cc.find_library('md', required : false)
+      kvm = cc.find_library('kvm', required : false)
 endif
 
-openssl = dependency('openssl', version: '>= 3.0.5', required : false)
-## Only use own md5-code if neither OpenSSL nor GnuTLS are present
-#ifneq ($(HAVE_SSL),1)
-#    EXTRAOBJS += md5c.o
-#endif
+
+
+
+# system options
+sysdeps = []
+sysargs = []
+syssrc = []
+if host_system == 'windows'
+   syssrc += ['src/sysdeps/win32.c']
+elif host_system == 'darwin'
+   syssrc += ['src/sysdeps/darwin.c', 'src/sysdeps/bsd-common.c']
+elif host_system == 'freebsd'
+   syssrc += ['src/sysdeps/freebsd.c', 'src/sysdeps/bsd-common.c',
+                 'src/sysdeps/sensors-common.c']
+   sysargs += ['-DHAVE_MD5_H']
+   sysargs += ['-DSENSORS_COMMON']
+   sysdeps += [devstat,md,kvm]
+elif host_system == 'dragonfly'
+   syssrc += ['src/sysdeps/dragonfly.c', 'src/sysdeps/bsd-common.c',
+                 'src/sysdeps/sensors-common.c']
+   sysargs += ['-DSENSORS_COMMON']
+   sysargs += ['-DHAVE_MD5_H']
+   sysdeps += [devstat,md,kvm]
+elif host_system == 'netbsd'
+   syssrc += ['src/sysdeps/netbsd.c', 'src/sysdeps/bsd-common.c',
+                 'src/sysdeps/sensors-common.c']
+   sysargs += ['-DHAVE_MD5_H']
+   sysdeps += [devstat,md,kvm]
+elif host_system == 'openbsd'
+   syssrc += ['src/sysdeps/openbsd.c', 'src/sysdeps/bsd-common.c']
+   sysargs += ['-DHAVE_MD5_H']
+   sysdeps += [devstat,md,kvm]
+elif host_system == 'sunos'
+   syssrc += ['src/sysdeps/solaris.c']
+   sysargs += ['-m32'] # , '-D_FILE_OFFSET_BITS=32']
+   sysdeps += [devinfo,md,kvm,kstat,socket]
+elif host_system == 'linux'
+   syssrc += ['src/sysdeps/linux.c', 'src/sysdeps/sensors-common.c']
+   sysargs += ['-DSENSORS_COMMON']
+elif libgtop.found()
+   sysargs += ['-DUSE_LIBGTOP']
+   syssrc += ['src/sysdeps/gtop.c']
+endif
+sysargs += ['-DHAVE_GETADDRINFO']
+if no_memdup2
+    sysargs += ['-DMISSING_MEMDUP2']
+endif
+
+
+
 
 clientdeps = []
 clientargs = []
@@ -54,12 +122,11 @@ clientlinkwiths = []
 if buildclient
    clientdeps += dependency('gtk+-2.0', version : '>=2.24.33', required : true)
    if (host_system != 'windows') and (host_system !=  'darwin')
-      clientdeps += dependency('x11', version: '>= 1.7.3.1', required : true)
+      clientdeps += dependency('x11', version: '>= 1.6.10', required : true)
       clientdeps += dependency('sm', version: '>= 1.2.3', required : true)
       clientdeps += dependency('ice', version: '>= 1.0.10', required : true)
    endif
-   clientdeps += dependency('glib-2.0', version : '>= 2.72.1', required : true)
-   clientdeps += dependency('gmodule-2.0', version : '>=2.72.1', required : true)
+   clientdeps += [glib, gmodule]
    math = cc.find_library('m', required : true)
    clientdeps += math
    # optional libraries
@@ -73,7 +140,6 @@ if buildclient
    endif
    if libgtop.found()
       clientdeps += libgtop
-      clientargs += '-DUSE_LIBGTOP'
    endif
    if enable_nls
       clientargs += '-DENABLE_NLS'
@@ -85,15 +151,13 @@ serverargs = ['-DGKRELLM_SERVER']
 serverlinks = []
 serverlinkwiths = []
 
-serverdeps += dependency('glib-2.0', version : '>= 2.72.1', required : true)
-serverdeps += dependency('gmodule-2.0', version : '>=2.72.1', required : true)
+serverdeps += [glib, gmodule]
 if lmsensors.found()
    serverdeps += lmsensors
    serverargs += '-DHAVE_LIBSENSORS=1'
 endif
 if libgtop.found()
    serverdeps += libgtop
-   serverargs += '-DUSE_LIBGTOP'
 endif
 if enable_nls
    serverargs += '-DENABLE_NLS'
@@ -104,7 +168,8 @@ debugargs = []
 if 1 == 1
    debugargs += ['-DGTK_DISABLE_SINGLE_INCLUDES' ]
 endif
-if 1 == 1
+# this breaks gkrellm on freebsd
+if 1 == 0
    debugargs += ['-DGDK_DISABLE_DEPRECATED', '-DGTK_DISABLE_DEPRECATED' ]
 endif
 if 1 == 1
@@ -118,34 +183,6 @@ if 1 == 1
 endif
 
 
-# sysdeps
-sysdepargs = []
-sysdepsrc = [] 
-if host_system == 'windows'
-   sysdepsrc += ['src/sysdeps/win32.c']
-elif host_system == 'darwin'
-   sysdepsrc += ['src/sysdeps/darwin.c', 'src/sysdeps/bsd-common.c']
-elif host_system == 'freebsd'
-   sysdepsrc += ['src/sysdeps/freebsd.c', 'src/sysdeps/bsd-common.c', 
-                 'src/sysdeps/sensors-common.c']
-   sysdepargs += ['-DSENSORS_COMMON']
-elif host_system == 'dragonfly'
-   sysdepsrc += ['src/sysdeps/dragonfly.c', 'src/sysdeps/bsd-common.c', 
-                 'src/sysdeps/sensors-common.c']
-   sysdepargs += ['-DSENSORS_COMMON']
-elif host_system == 'netbsd'
-   sysdepsrc += ['src/sysdeps/netbsd.c', 'src/sysdeps/bsd-common.c', 
-                 'src/sysdeps/sensors-common.c',
-                 'src/sysdeps/bsd-net-open.c']
-elif host_system == 'openbsd'
-   sysdepsrc += ['src/sysdeps/openbsd.c', 'src/sysdeps/bsd-common.c', 
-                 'src/sysdeps/bsd-net-open.c']
-elif host_system == 'sunos'
-   sysdepsrc += ['src/sysdeps/solaris.c']
-elif host_system == 'linux'
-   sysdepsrc += ['src/sysdeps/linux.c', 'src/sysdeps/sensors-common.c']
-   sysdepargs += ['-DSENSORS_COMMON']
-endif
 
 builtins = ['src/builtins/battery.c', 'src/builtins/clock.c', 'src/builtins/cpu.c',
             'src/builtins/disk.c', 'src/builtins/fs.c', 'src/builtins/hostname.c',
@@ -175,7 +212,7 @@ else
    src += ['src/client/winops-x11.c']
 endif
 # sysdeps
-src += sysdepsrc
+src += syssrc
 
 
 
@@ -189,13 +226,13 @@ if host_system == 'windows'
                                 c_args : serverargs + debugargs,
                                 dependencies : serverdeps)
 endif
-server += sysdepsrc
+server += syssrc
 
 #sharedh = include_directories('src/shared')
 shared = ['src/shared/base64.c', 'src/sysdeps/core.c', 'src/shared/log.c', 'src/shared/utils.c']
 
-clientargs += sysdepargs
-serverargs += sysdepargs
+clientargs += sysargs
+serverargs += sysargs
 if host_system == 'windows'
    clientdeps += windeps
    clientargs += ['-D_WIN32_WINNT=0x0501', '-DWINVER=0x0501', '-DWIN32_LEAN_AND_MEAN']
@@ -206,6 +243,9 @@ if host_system == 'windows'
    #serverlinks += ['-Wl,--dynamicbase', '-Wl,--nxcompat']
    serverlinkwiths = libgkrellmd
 endif
+
+clientdeps += sysdeps
+serverdeps += sysdeps
 
 server += shared
 src += shared

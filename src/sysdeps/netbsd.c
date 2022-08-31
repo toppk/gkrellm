@@ -13,6 +13,10 @@
 
 #include <kvm.h>
 
+#include "../gkrellm.h"
+#include "../gkrellm-private.h"
+#include "../gkrellm-sysdeps.h"
+
 kvm_t	*kvmd = NULL;
 char	errbuf[_POSIX2_LINE_MAX];
 
@@ -811,3 +815,9 @@ gkrellm_sys_inet_read_tcp_data()
 	}
 }
 #endif
+
+gboolean
+gkrellm_sys_inet_init(void)
+{
+	return TRUE;
+}
