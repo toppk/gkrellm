@@ -32,13 +32,14 @@ glib = dependency('glib-2.0', version : '>= 2.62.6', required : true)
 no_memdup2 = glib.version().version_compare('< 2.68.0') 
 gmodule = dependency('gmodule-2.0', version : '>= 2.62.6', required : true)
 
+disable_openssl = get_option('disable_openssl')
 
-openssl = dependency('openssl', version: '>= 1.1.1o', required : false)
-## Only use own md5-code if neither OpenSSL nor GnuTLS are present
-#ifneq ($(HAVE_SSL),1)
-#    EXTRAOBJS += md5c.o
-#endif
-
+if disable_openssl
+	openssl = null_dep
+else
+	openssl = dependency('openssl', version: '>= 1.1.1o', required : false)
+endif
+md = null_dep
 
 enable_nls = get_option('enable_nls')
 
@@ -52,10 +53,10 @@ if host_system == 'windows'
    windeps = [winws2_32, winwtsapi32, winpdh, winnetapi32, winiphlpapi, winintl]
 elif host_system == 'sunos'
       devinfo = cc.find_library('devinfo', required : false)
-      md = cc.find_library('md', required : false)
+      md = cc.find_library('md5', required : false)
       kstat = cc.find_library('kstat', required : false)
       kvm = cc.find_library('kvm', required : false)
-      socket = cc.find_library('socket', required : false)
+      socket = cc.find_library('socket', required : true)
 elif host_system == 'freebsd' or host_system == 'dragonfly' or\
    host_system == 'netbsd' or host_system == 'openbsd'
       devstat = cc.find_library('devstat', required : false)
@@ -65,11 +66,16 @@ endif
 
 
 
-
 # system options
 sysdeps = []
 sysargs = []
 syssrc = []
+
+if openssl.found()
+	sysdeps += [openssl]
+	sysargs += ['-DHAVE_SSL']
+	md = null_dep
+endif
 if host_system == 'windows'
    syssrc += ['src/sysdeps/win32.c']
 elif host_system == 'darwin'
@@ -77,28 +83,44 @@ elif host_system == 'darwin'
 elif host_system == 'freebsd'
    syssrc += ['src/sysdeps/freebsd.c', 'src/sysdeps/bsd-common.c',
                  'src/sysdeps/sensors-common.c']
-   sysargs += ['-DHAVE_MD5_H']
+	if md.found()
+		sysargs += ['-DHAVE_MD5']
+		sysdeps += [md]
+	endif
    sysargs += ['-DSENSORS_COMMON']
-   sysdeps += [devstat,md,kvm]
+   sysdeps += [devstat,kvm]
 elif host_system == 'dragonfly'
    syssrc += ['src/sysdeps/dragonfly.c', 'src/sysdeps/bsd-common.c',
-                 'src/sysdeps/sensors-common.c']
+              'src/sysdeps/sensors-common.c']
    sysargs += ['-DSENSORS_COMMON']
-   sysargs += ['-DHAVE_MD5_H']
-   sysdeps += [devstat,md,kvm]
+	if md.found()
+		sysargs += ['-DHAVE_MD5']
+		sysdeps += [md]
+	endif
+	sysdeps += [devstat,kvm]
 elif host_system == 'netbsd'
    syssrc += ['src/sysdeps/netbsd.c', 'src/sysdeps/bsd-common.c',
                  'src/sysdeps/sensors-common.c']
-   sysargs += ['-DHAVE_MD5_H']
-   sysdeps += [devstat,md,kvm]
+	if md.found()
+		sysargs += ['-DHAVE_MD5']
+		sysdeps += [md]
+	endif
+	sysdeps += [devstat,kvm]
 elif host_system == 'openbsd'
    syssrc += ['src/sysdeps/openbsd.c', 'src/sysdeps/bsd-common.c']
-   sysargs += ['-DHAVE_MD5_H']
-   sysdeps += [devstat,md,kvm]
+	if md.found()
+		sysargs += ['-DHAVE_MD5']
+		sysdeps += [md]
+	endif
+	sysdeps += [devstat,kvm]
 elif host_system == 'sunos'
    syssrc += ['src/sysdeps/solaris.c']
-   sysargs += ['-m32'] # , '-D_FILE_OFFSET_BITS=32']
-   sysdeps += [devinfo,md,kvm,kstat,socket]
+   sysargs += ['-m32', '-DHAVE_MD5'] # , '-D_FILE_OFFSET_BITS=32']
+	if md.found()
+		sysargs += ['-DHAVE_MD5']
+		sysdeps += [md]
+	endif
+   sysdeps += [devinfo,kvm,kstat,socket]
 elif host_system == 'linux'
    syssrc += ['src/sysdeps/linux.c', 'src/sysdeps/sensors-common.c']
    sysargs += ['-DSENSORS_COMMON']
@@ -109,6 +131,9 @@ endif
 sysargs += ['-DHAVE_GETADDRINFO']
 if no_memdup2
     sysargs += ['-DMISSING_MEMDUP2']
+endif
+if not openssl.found() and not md.found()
+   syssrc += ['src/shared/md5.c']
 endif
 
 
@@ -130,10 +155,6 @@ if buildclient
    math = cc.find_library('m', required : true)
    clientdeps += math
    # optional libraries
-   if openssl.found()
-      clientdeps += openssl
-      clientargs += '-DHAVE_SSL'
-   endif
    if lmsensors.found()
       clientdeps += lmsensors
       clientargs += '-DHAVE_LIBSENSORS=1'
@@ -205,14 +226,12 @@ if host_system == 'windows'
                                c_args : clientargs + debugargs,
                                dependencies : clientdeps)
    src += ['src/client/winops-win32.c', 'src/client/win32-plugin.c']
-   src += ['src/shared/md5c.c']
 elif host_system == 'darwin'
    src += ['src/client/winops-gtk-mac.c']
 else
    src += ['src/client/winops-x11.c']
 endif
 # sysdeps
-src += syssrc
 
 
 
@@ -226,7 +245,6 @@ if host_system == 'windows'
                                 c_args : serverargs + debugargs,
                                 dependencies : serverdeps)
 endif
-server += syssrc
 
 #sharedh = include_directories('src/shared')
 shared = ['src/shared/base64.c', 'src/sysdeps/core.c', 'src/shared/log.c', 'src/shared/utils.c']
@@ -247,8 +265,8 @@ endif
 clientdeps += sysdeps
 serverdeps += sysdeps
 
-server += shared
-src += shared
+src += syssrc + shared
+server += syssrc + shared
 
 buildserver = true
 #buildclient = false

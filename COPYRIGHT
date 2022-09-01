@@ -27,7 +27,19 @@ The code in the GKrellM distribution is Copyright (C) 1999-2019 by Bill Wilson
 except for:
   base64.c which is Copyright 1997 by Eric S. Raymond and is under the GPL,
 and
-  md5.h, md5c.c which are public domain,
+  md5.c and md5.h which are public domain.
+ * Author:
+ * Alexander Peslyak, better known as Solar Designer <solar at openwall.com>
+ *
+ * This software was written by Alexander Peslyak in 2001.  No copyright is
+ * claimed, and the software is hereby placed in the public domain.
+ * In case this attempt to disclaim copyright and place the software in the
+ * public domain is deemed null and void, then the software is
+ * Copyright (c) 2001 Alexander Peslyak and it is hereby released to the
+ * general public under the following terms:
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted.
 and
   some system dependent files which port GKrellM to architectures other
   than Linux are Copyright their authors as indicated in the respective files,

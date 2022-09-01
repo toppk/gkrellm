@@ -15,14 +15,16 @@
 #include <sys/time.h>
 #include <errno.h>
 
+#include "../shared/md5.h"
+
 #include	"pixmaps/mail/decal_mail.xpm"
+
+#if defined(HAVE_SSL)
+#include <openssl/ssl.h>
+#endif
 
 #if defined(HAVE_GNUTLS)
 #include <gnutls/openssl.h>
-
-#define MD5Init		MD5_Init
-#define MD5Update	MD5_Update
-#define MD5Final	MD5_Final
 
 #if GNUTLS_VERSION_NUMBER <= 0x020b00
 #include <gcrypt.h>
@@ -69,21 +71,6 @@ static struct gcry_thread_cbs gk_gcry_threads_glib = {
 
 #endif
 
-#else
-
-#if defined(HAVE_SSL)
-#include <openssl/ssl.h>
-#include <openssl/md5.h>
-#define MD5Init		MD5_Init
-#define MD5Update	MD5_Update
-#define MD5Final	MD5_Final
-#else
-#if defined(HAVE_MD5_H)
-#include <md5.h>
-#else
-#include "../shared/md5.h"
-#endif
-#endif
 #endif
 
 #if defined(HAVE_NTLM)
@@ -888,9 +875,9 @@ hmac_md5(unsigned char *password,  size_t pass_len,
 
 	if (pass_len > sizeof(ipad))
 		{
-		MD5Init(&ctx);
-		MD5Update(&ctx, password, pass_len);
-		MD5Final(hash_passwd, &ctx);
+		MD5_Init(&ctx);
+		MD5_Update(&ctx, password, pass_len);
+		MD5_Final(hash_passwd, &ctx);
 		password = hash_passwd;
 		pass_len = sizeof(hash_passwd);
 		}
@@ -906,15 +893,15 @@ hmac_md5(unsigned char *password,  size_t pass_len,
 		opad[i] ^= 0x5c;
 		}
 
-	MD5Init(&ctx);
-	MD5Update(&ctx, ipad, sizeof(ipad));
-	MD5Update(&ctx, challenge, chal_len);
-	MD5Final(response, &ctx);
+	MD5_Init(&ctx);
+	MD5_Update(&ctx, ipad, sizeof(ipad));
+	MD5_Update(&ctx, challenge, chal_len);
+	MD5_Final(response, &ctx);
 
-	MD5Init(&ctx);
-	MD5Update(&ctx, opad, sizeof(opad));
-	MD5Update(&ctx, response, resp_len);
-	MD5Final(response, &ctx);
+	MD5_Init(&ctx);
+	MD5_Update(&ctx, opad, sizeof(opad));
+	MD5_Update(&ctx, response, resp_len);
+	MD5_Final(response, &ctx);
 	}
 
 /* authenticate as per RFC2195 */
@@ -1117,9 +1104,9 @@ check_pop3(Mailbox *mbox)
 		*(p + 1) = '\0';
 		snprintf(line, sizeof(line), "%s%s", key, account->password);
 		g_free(challenge);
-		MD5Init(&ctx);
-		MD5Update(&ctx, (unsigned char *)line, strlen(line));
-		MD5Final(digest, &ctx);
+		MD5_Init(&ctx);
+		MD5_Update(&ctx, (unsigned char *)line, strlen(line));
+		MD5_Final(digest, &ctx);
 		for (i = 0;  i < 16;  i++)
 			{
 			ascii_digest[i + i] = hex[digest[i] >> 4];

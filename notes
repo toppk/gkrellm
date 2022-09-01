@@ -1,6 +1,7 @@
 # status
 
 * Linux:     Fedora 36     - gkrellm & gkrellmd working
+             Ubunto 22.04  - gkrellm & gkrellmd working
 * FreeBSD:   Freebsd 13.1  - gkrellm & gkrellmd working
 * NetBSD:    NetBSD 9.3    - gkrellm & gkrellmd working
 * OpenBSD:   OpenBSD 7.1   - gkrellm & gkrellmd working

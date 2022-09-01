@@ -23,3 +23,9 @@ option(
   value : 'true',
   description : 'enable translations.'
 )
+option(
+  'disable_openssl',
+  type : 'boolean',
+  value : 'false',
+  description : 'disable openssl.'
+)
