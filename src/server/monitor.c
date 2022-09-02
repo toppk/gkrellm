@@ -2232,9 +2232,8 @@ gkrellmd_serve_setup(GkrellmdClient *client)
 
 	gkrellmd_send_to_client(client, "<gkrellmd_setup>\n");
 
-	s = g_strdup_printf("<version>\ngkrellmd %d.%d.%d%s\n",
-				GKRELLMD_VERSION_MAJOR, GKRELLMD_VERSION_MINOR,
-				GKRELLMD_VERSION_REV, GKRELLMD_EXTRAVERSION);
+	s = g_strdup_printf("<version>\ngkrellmd %s\n",
+						GKRELLM_FULL_VERSION_STR);
 	gkrellmd_send_to_client(client, s);
 	g_free(s);
 

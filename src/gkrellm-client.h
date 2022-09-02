@@ -52,23 +52,12 @@
 
 
 
+#include "gkrellmv.h"
 
 
 
 /* -------------------------------------------------------------------
 */
-#define	GKRELLM_VERSION_MAJOR	2
-#define	GKRELLM_VERSION_MINOR	3
-#define	GKRELLM_VERSION_REV		11
-#define	GKRELLM_EXTRAVERSION	""
-//#define	GKRELLM_EXTRAVERSION	"-pre1"
-
-#define GKRELLM_CHECK_VERSION(major,minor,rev)    \
-	(GKRELLM_VERSION_MAJOR > (major) || \
-	(GKRELLM_VERSION_MAJOR == (major) && GKRELLM_VERSION_MINOR > (minor)) || \
-	(GKRELLM_VERSION_MAJOR == (major) && GKRELLM_VERSION_MINOR == (minor) && \
-	GKRELLM_VERSION_REV >= (rev)))
-
 #define	GKRELLM_DIR				".gkrellm2"
 #define	GKRELLM_USER_CONFIG		".gkrellm2/user-config"
 #define	GKRELLM_2_1_14_CONFIG	".gkrellm2/user_config"

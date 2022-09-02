@@ -733,13 +733,12 @@ create_about_tab(GtkWidget *vbox)
 	label = gtk_label_new("");
 	gtk_box_pack_start(GTK_BOX(vbox), label, TRUE, TRUE, 0);
 
-	buf = g_strdup_printf(_("GKrellM %d.%d.%d%s\nGNU Krell Monitors\n\n"
+	buf = g_strdup_printf(_("GKrellM %s\nGNU Krell Monitors\n\n"
 				"Copyright (c) %s by Bill Wilson\n"
 				"billw@gkrellm.net\n"
 				"http://gkrellm.net\n\n"
 				"Released under the GNU General Public License"),
-				GKRELLM_VERSION_MAJOR, GKRELLM_VERSION_MINOR,
-				GKRELLM_VERSION_REV, GKRELLM_EXTRAVERSION,
+				GKRELLM_FULL_VERSION_STR,
 				"1999-2019");
 	label = gtk_label_new(buf);
 	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_CENTER);

@@ -210,11 +210,10 @@ gkrellmd_cleanup()
 static void
 cb_sigterm(gint sig)
 	{
-	g_message("GKrellM Daemon %d.%d.%d%s: Exiting normally\n",
-			GKRELLMD_VERSION_MAJOR, GKRELLMD_VERSION_MINOR,
-			GKRELLMD_VERSION_REV, GKRELLMD_EXTRAVERSION);
-	gkrellmd_cleanup();
-	exit(0);
+		g_message("GKrellM Daemon %s: Exiting normally\n",
+				  GKRELLM_FULL_VERSION_STR);
+		gkrellmd_cleanup();
+		exit(0);
 	}
 
 gint
@@ -1189,9 +1188,7 @@ gkrellmd_run(gint argc, gchar **argv)
 	get_args(argc, argv);
 
 	// first message that might get logged
-	g_message("Starting GKrellM Daemon %d.%d.%d%s\n", GKRELLMD_VERSION_MAJOR,
-			GKRELLMD_VERSION_MINOR, GKRELLMD_VERSION_REV,
-			GKRELLMD_EXTRAVERSION);
+	g_message("Starting GKrellM Daemon %s\n", GKRELLM_FULL_VERSION_STR);
 
 	if (_GK.verbose)
 		g_print("update_HZ=%d\n", _GK.update_HZ);
@@ -1443,9 +1440,8 @@ void WINAPI service_main(DWORD argc, WCHAR* argv[])
 
 		// services are not stopped via process signals so we have to
 		// clean up like in cb_sigterm() but without calling exit()!
-		g_message("GKrellM Daemon %d.%d.%d%s: Exiting normally\n",
-				GKRELLMD_VERSION_MAJOR, GKRELLMD_VERSION_MINOR,
-				GKRELLMD_VERSION_REV, GKRELLMD_EXTRAVERSION);
+		g_message("GKrellM Daemon %s: Exiting normally\n",
+				  GKRELLM_FULL_VERSION_STR);
 		gkrellmd_cleanup();
 
 		// free all strings in pointer array and free the array itself
@@ -1725,10 +1721,8 @@ int main(int argc, char* argv[])
 			}
 		else if (!strcmp(opt, "version") || !strcmp(opt, "v"))
 			{
-			g_print("gkrellmd %d.%d.%d%s\n", GKRELLMD_VERSION_MAJOR,
-					GKRELLMD_VERSION_MINOR, GKRELLMD_VERSION_REV,
-					GKRELLMD_EXTRAVERSION);
-			return 0;
+				g_print("gkrellmd %s\n", GKRELLM_FULL_VERSION_STR);
+				return 0;
 			}
 #if defined(WIN32)
 		else if (!strcmp(opt, "install"))

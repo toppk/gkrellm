@@ -1,7 +1,7 @@
 project(
        'gkrellm',
        'c',
-       version : '2.5.0',
+       version : '2.5.0-pre1',
        license : 'GPL',
        meson_version : '>= 0.61.1',
        default_options : []
@@ -235,7 +235,7 @@ src = ['src/client/alerts.c', 'src/client/chart.c', 'src/client/client.c',
 src += builtins
 # gui (+extras for windows)
 if host_system == 'windows'
-   cwinrsc = windows.compile_resources('src/client/win32-resource.rc')
+   cwinrsc = windows.compile_resources(join_paths(meson.current_build_dir(),'win32-resource-client.rc'))
    src += cwinrsc
    libgkrellm = static_library('gkrellm', 'src/client/win32-libgkrellm.c',
                                c_args : clientargs + debugargs,
@@ -253,7 +253,7 @@ endif
 
 server = ['src/server/mail.c', 'src/server/main.c', 'src/server/monitor.c', 'src/server/plugins.c']
 if host_system == 'windows'
-   swinrsc = windows.compile_resources('src/server/win32-resource.rc')
+   swinrsc = windows.compile_resources(join_paths(meson.current_build_dir(),'win32-resource-server.rc'))
    server += swinrsc
    server += ['src/server/win32-plugin.c']
    libgkrellmd = static_library('gkrellmd', 'src/server/win32-libgkrellmd.c',
@@ -307,7 +307,6 @@ endif
 
 
 config_h = configuration_data()
-config_h.set_quoted('GKRELLM_VERSION', meson.project_version())
 config_h.set('HAVE_SSL', have_openssl)
 config_h.set('HAVE_TLS', have_gnutls)
 config_h.set('HAVE_MD5', have_md5)
@@ -317,3 +316,62 @@ configure_file(
   output: 'config.h',
   configuration: config_h,
 )
+
+
+full_version = meson.project_version()
+version_split = full_version.split('-')
+version_components = version_split[0].split('.')
+
+if version_split.length() == 2
+	version_extra = version_split[1]
+else
+	version_extra = ''
+endif
+gkrellmv_h = configuration_data()
+gkrellmv_h.set('GKRELLM_VERSION_MAJOR', version_components[0].to_int())
+gkrellmv_h.set('GKRELLM_VERSION_MINOR', version_components[1].to_int())
+gkrellmv_h.set('GKRELLM_VERSION_REV', version_components[2].to_int())
+gkrellmv_h.set_quoted('GKRELLM_EXTRAVERSION', version_extra)
+gkrellmv_h.set_quoted('GKRELLM_VERSION_STR', version_split[0])
+gkrellmv_h.set_quoted('GKRELLM_FULL_VERSION_STR', full_version)
+
+configure_file(
+  input: 'gkrellmv.h.in',
+  output: 'gkrellmv.h',
+  configuration: gkrellmv_h,
+)
+
+if host_system == 'windows'
+
+
+	resource_client_h = configuration_data()
+	resource_client_h.set('version', version_split[0])
+	resource_client_h.set('version_major', version_components[0].to_int())
+	resource_client_h.set('version_minor', version_components[1].to_int())
+	resource_client_h.set('version_rev', version_components[2].to_int())
+	resource_client_h.set('description', 'GKrellM')
+	resource_client_h.set('shortdesc', 'gkrellm')
+	resource_client_h.set('icon', '#define IDI_ICON3 105\n\n//\n// Icon resources\n//\nLANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL\nIDI_ICON3 ICON "../gkrellm.ico"\n')
+
+	configure_file(
+	input: 'win32-resource.rc.in',
+	output: 'win32-resource-client.rc',
+	configuration: resource_client_h,
+	)
+
+	resource_server_h = configuration_data()
+	resource_server_h.set('version', version_split[0])
+	resource_server_h.set('version_major', version_components[0].to_int())
+	resource_server_h.set('version_minor', version_components[1].to_int())
+	resource_server_h.set('version_rev', version_components[2].to_int())
+	resource_server_h.set('description', 'GKrellM Daemon')
+	resource_server_h.set('shortdesc', 'gkrellmd')
+	resource_server_h.set('icon', '')
+
+	configure_file(
+	input: 'win32-resource.rc.in',
+	output: 'win32-resource-server.rc',
+	configuration: resource_server_h,
+	)
+
+endif

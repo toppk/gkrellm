@@ -27,6 +27,8 @@
 
 #endif
 
+#include "gkrellmv.h"
+
 /* Internationalization support.
  */
 #if defined(ENABLE_NLS)

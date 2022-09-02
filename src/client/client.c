@@ -1805,9 +1805,8 @@ gkrellm_client_mode_connect(void)
 	if (client_fd < 0)
 		return BAD_CONNECT;
 
-	snprintf(buf, sizeof(buf), "gkrellm %d.%d.%d%s\n",
-			GKRELLM_VERSION_MAJOR, GKRELLM_VERSION_MINOR,
-			GKRELLM_VERSION_REV, GKRELLM_EXTRAVERSION);
+	snprintf(buf, sizeof(buf), "gkrellm %s\n",
+			GKRELLM_FULL_VERSION_STR);
 	send(client_fd, buf, strlen(buf), 0);
 
 	/* Initial setup lines from server are read in blocking mode.

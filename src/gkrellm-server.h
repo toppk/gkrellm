@@ -53,21 +53,8 @@
 #include <signal.h>
 #include <errno.h>
 
-
-
 /* -------------------------------------------------------------------
 */
-#define GKRELLMD_VERSION_MAJOR   2
-#define GKRELLMD_VERSION_MINOR   3
-#define GKRELLMD_VERSION_REV     11
-#define GKRELLMD_EXTRAVERSION    ""
-//#define GKRELLMD_EXTRAVERSION    "-pre1"
-
-#define GKRELLMD_CHECK_VERSION(major,minor,rev)    \
-(GKRELLMD_VERSION_MAJOR > (major) || \
-(GKRELLMD_VERSION_MAJOR == (major) && GKRELLMD_VERSION_MINOR > (minor)) || \
-(GKRELLMD_VERSION_MAJOR == (major) && GKRELLMD_VERSION_MINOR == (minor) && \
-GKRELLMD_VERSION_REV >= (rev)))
 
 #define GKRELLMD_CONFIG				"gkrellmd.conf"
 #if defined(WIN32)

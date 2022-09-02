@@ -2420,8 +2420,7 @@ gkrellm_save_user_config(void)
 
 	fprintf(f,
 		"### GKrellM user config.  Auto written, do not edit (usually) ###\n");
-	fprintf(f, "### Version %d.%d.%d ###\n",
-			GKRELLM_VERSION_MAJOR, GKRELLM_VERSION_MINOR, GKRELLM_VERSION_REV);
+	fprintf(f, "### Version %s ###\n", GKRELLM_VERSION_STR);
 	for (i = 0; i < sizeof(user_config) / sizeof(struct _config); ++i)
 		{
 		if (user_config[i].value)

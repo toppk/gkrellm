@@ -5,8 +5,6 @@
 
 #pragma once
 
-#mesondefine GKRELLM_VERSION
-
 /* Whether libmd/libmd5 support is enabled */
 #mesondefine HAVE_MD5
 

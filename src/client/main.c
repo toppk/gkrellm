@@ -2192,10 +2192,8 @@ main(gint argc, gchar **argv)
 			_GK.test += 1;
 		else if (!strcmp(s, "version") || !strcmp(s, "v"))
 			{
-			g_print("%s %d.%d.%d%s\n", PACKAGE, GKRELLM_VERSION_MAJOR,
-					GKRELLM_VERSION_MINOR, GKRELLM_VERSION_REV,
-					GKRELLM_EXTRAVERSION);
-			exit(0);
+				g_print("%s %s\n", PACKAGE, GKRELLM_FULL_VERSION_STR);
+				exit(0);
 			}
 		else if (strcmp(s, "help") == 0 || strcmp(s, "h") == 0)
 			{
@@ -2211,8 +2209,7 @@ main(gint argc, gchar **argv)
 		}
 
 	if (_GK.debug_level > 0)
-		g_debug("--- GKrellM %d.%d.%d ---\n", GKRELLM_VERSION_MAJOR,
-			GKRELLM_VERSION_MINOR, GKRELLM_VERSION_REV);
+		g_debug("--- GKrellM %s ---\n", GKRELLM_VERSION_STR);
 
 	if (_GK.sys_setup_func)
 		(*_GK.sys_setup_func)(argc, argv);

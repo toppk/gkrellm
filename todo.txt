@@ -29,6 +29,8 @@
 * documentation
 * tabify
 * look for other forks/plugins/themes and bring them all home
+* update icons (high res + icon for windows daemon?)
+* PACKAGE macro
 * client/sensors.c has some sysdep interface functions should be in
   systems/sensors-common.c
 * move to meson: HAVE_GETADDRINFO
