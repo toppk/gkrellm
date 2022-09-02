@@ -29,3 +29,9 @@ option(
   value : 'false',
   description : 'disable openssl.'
 )
+option(
+  'enable_gnutls',
+  type : 'boolean',
+  value : 'false',
+  description : 'enable gnutls.'
+)

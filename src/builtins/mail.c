@@ -8,6 +8,8 @@
 |  Latest versions might be found at:  http://gkrellm.net
 */
 
+#include "config.h"
+
 #include "../gkrellm.h"
 #include "../gkrellm-private.h"
 
@@ -21,56 +23,6 @@
 
 #if defined(HAVE_SSL)
 #include <openssl/ssl.h>
-#endif
-
-#if defined(HAVE_GNUTLS)
-#include <gnutls/openssl.h>
-
-#if GNUTLS_VERSION_NUMBER <= 0x020b00
-#include <gcrypt.h>
-/* gcrypt mutex setup is only needed for GnuTLS < 2.12 */
-
-static int gk_gcry_glib_mutex_init (void **priv) {
-    GMutex *lock = g_mutex_new();
-    if (!lock)
-        return ENOMEM;
-    *priv = lock;
-    return 0;
-}
-
-static int gk_gcry_glib_mutex_destroy (void **lock) {
-    if (!lock || !*lock)
-        return 1; // what to return?
-    g_mutex_free((GMutex *)*lock);
-    return 0;
-}
-
-static int gk_gcry_glib_mutex_lock (void **lock) {
-    if (!lock || !*lock)
-        return 1; // what to return?
-    g_mutex_lock((GMutex*)*lock);
-    return 0;
-}
-
-static int gk_gcry_glib_mutex_unlock (void **lock) {
-    if (!lock || !*lock)
-        return 1; // what to return?
-    g_mutex_unlock((GMutex*)*lock);
-    return 0;
-}
-
-static struct gcry_thread_cbs gk_gcry_threads_glib = {
-  (GCRY_THREAD_OPTION_USER | (GCRY_THREAD_OPTION_VERSION << 8)),
-  NULL /* init() */,
-  gk_gcry_glib_mutex_init,
-  gk_gcry_glib_mutex_destroy,
-  gk_gcry_glib_mutex_lock,
-  gk_gcry_glib_mutex_unlock,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
-};
-
-#endif
-
 #endif
 
 #if defined(HAVE_NTLM)
@@ -253,7 +205,7 @@ typedef struct
 typedef struct
 	{
 	gint	fd;
-#ifdef HAVE_SSL
+#if defined(HAVE_SSL)
 	SSL	*ssl;
 	SSL_CTX	*ssl_ctx;
 #endif
@@ -311,8 +263,7 @@ static gint		anim_frame,
 
 static gint		style_id;
 
-#ifdef HAVE_SSL
-#ifndef HAVE_GNUTLS
+#if defined(HAVE_SSL)
 static GMutex		**ssl_locks;
 
 #if defined(OPENSSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER < 0x10100000L) || defined(LIBRESSL_VERSION_NUMBER)
@@ -324,7 +275,6 @@ ssl_locking_cb(int mode, int n, const char *file, int line)
 	else
 		g_mutex_unlock(ssl_locks[n]);
 	}
-#endif
 #endif
 #endif
 
@@ -604,7 +554,7 @@ tcp_getline(ConnInfo *conn, Mailbox *mbox)
 	s = buf;
 	for (;;)
 		{
-#ifdef HAVE_SSL
+#if defined(HAVE_SSL)
 		if (conn->ssl)
 			n = SSL_read(conn->ssl, s, 1);
 		else
@@ -712,9 +662,7 @@ static void
 tcp_close(ConnInfo *conn)
 	{
 #ifdef HAVE_SSL
-#ifndef HAVE_GNUTLS
 	SSL_SESSION *session;
-#endif
 #endif
 
 	if (conn->fd != -1)
@@ -726,14 +674,12 @@ tcp_close(ConnInfo *conn)
 #endif
 		conn->fd = -1;
 		}
-#ifdef HAVE_SSL
+#if defined(HAVE_SSL)
 	if (conn->ssl)
 		{
-#ifndef HAVE_GNUTLS
 		session = SSL_get_session(conn->ssl);
 		if (session)
 			SSL_CTX_remove_session(conn->ssl_ctx, session);
-#endif
 		SSL_free(conn->ssl);
 		conn->ssl = NULL;
 		}
@@ -772,9 +718,9 @@ tcp_shutdown(ConnInfo *conn, Mailbox *mbox, gchar *message, gboolean warn)
 	return tcp_warn(mbox, message, warn);
 	}
 
-#ifdef HAVE_SSL
+#if defined(HAVE_SSL)
 static gboolean
-ssl_negotiate(ConnInfo *conn, Mailbox *mbox)
+	ssl_negotiate(ConnInfo *conn, Mailbox *mbox)
 	{
 	const SSL_METHOD	*ssl_method = NULL;
 	gchar	buf[128];
@@ -820,10 +766,7 @@ ssl_negotiate(ConnInfo *conn, Mailbox *mbox)
 		return tcp_shutdown(conn, mbox,
 				    N_("Cannot initialize SSL handler."),
 				    FALSE);
-#ifndef HAVE_GNUTLS
 	SSL_clear(conn->ssl);
-#endif
-
 	SSL_set_fd(conn->ssl, conn->fd);
 	SSL_set_connect_state(conn->ssl);
 	if (SSL_connect(conn->ssl) < 0)
@@ -848,7 +791,7 @@ tcp_connect(ConnInfo *conn, Mailbox *mbox)
 	conn->fd = gkrellm_connect_to(account->server, account->port);
 	if (conn->fd < 0)
 		return tcp_warn(mbox, tcp_error_message[0], FALSE);
-#ifdef HAVE_SSL
+#if defined(HAVE_SSL)
 	if (account->use_ssl == SSL_TRANSPORT && !ssl_negotiate(conn, mbox))
 		return FALSE;
 #endif
@@ -1059,7 +1002,7 @@ check_pop3(Mailbox *mbox)
 	     (challenge = g_strdup(mbox->tcp_in->str + 3)) == NULL))
 		return tcp_shutdown(&conn, mbox, tcp_error_message[1], FALSE);
 
-#ifdef HAVE_SSL
+#if defined(HAVE_SSL)
 	if (account->use_ssl == SSL_STARTTLS)
 		{
 		server_command(&conn, mbox, "STLS\r\n");
@@ -1234,7 +1177,7 @@ check_imap(Mailbox *mbox)
 	if (! server_response(&conn, mbox, "* OK"))
 		return tcp_shutdown(&conn, mbox, tcp_error_message[1], FALSE);
 
-#ifdef HAVE_SSL
+#if defined(HAVE_SSL)
 	if (account->use_ssl == SSL_STARTTLS)
 		{
 		if (_GK.debug_level & DEBUG_MAIL)
@@ -2985,8 +2928,8 @@ save_mail_config(FILE *f)
 				fprintf(f, "\n");
 				if (qq)
 					fprintf(f, "mail password %s\n", account->password);
-#ifdef HAVE_SSL
-				fprintf(f, "mail mailbox-remote-use-ssl %d\n",
+#if defined(HAVE_SSL)
+					fprintf(f, "mail mailbox-remote-use-ssl %d\n",
 							account->use_ssl);
 #endif
 				break;
@@ -3069,10 +3012,10 @@ load_mail_config(gchar *arg)
 				account_prev = NULL;
 				}
 			}
-#ifdef HAVE_SSL
-		else if (account_prev &&
-			 !strcmp(mail_config, "mailbox-remote-use-ssl"))
-			sscanf(item, "%d", &account_prev->use_ssl);
+#if defined(HAVE_SSL)
+			else if (account_prev &&
+			 		!strcmp(mail_config, "mailbox-remote-use-ssl"))
+				sscanf(item, "%d", &account_prev->use_ssl);
 #endif
 		else if (account_prev && !strcmp(mail_config, "password"))
 			gkrellm_dup_string(&account_prev->password, item);
@@ -3120,7 +3063,7 @@ load_mail_config(gchar *arg)
 enum
 	{
 	PROTOCOL_COLUMN,
-#ifdef HAVE_SSL
+#if defined(HAVE_SSL)
 	SSL_COLUMN,
 #endif
 	MAILBOX_COLUMN,
@@ -3139,7 +3082,7 @@ static GtkWidget		*server_entry,
 						*password_entry,
 						*imapfolder_entry,
 						*port_entry,
-#ifdef HAVE_SSL
+#if defined(HAVE_SSL)
 						*ssl_combo_box,
 #endif
 						*port_button;
@@ -3214,8 +3157,8 @@ set_list_store_model_data(GtkListStore *store, GtkTreeIter *iter,
 	{
 	gchar	*protocol, *mailbox, *default_port = NULL, abuf[32], pbuf[32];
 	gchar	*s;
-#ifdef HAVE_SSL
-	gchar	*use_ssl;
+#if defined(HAVE_SSL)
+	gchar 	*use_ssl;
 #endif
 
 	if (account->mboxtype == MBOX_REMOTE)
@@ -3250,24 +3193,24 @@ set_list_store_model_data(GtkListStore *store, GtkTreeIter *iter,
 					account->homedir_path : account->path);
 		}
 	protocol = x_out(abuf);
-#ifdef HAVE_SSL
+#if defined(HAVE_SSL)
 	switch (account->use_ssl)
-		{
-		case SSL_TRANSPORT:
-			use_ssl = "SSL";
-			break;
-		case SSL_STARTTLS:
-			use_ssl = "STARTTLS";
-			break;
-		default:
-			use_ssl = "";
-			break;
-		}
+	{
+	case SSL_TRANSPORT:
+		use_ssl = "SSL";
+		break;
+	case SSL_STARTTLS:
+		use_ssl = "STARTTLS";
+		break;
+	default:
+		use_ssl = "";
+		break;
+	}
 #endif
 
 	gtk_list_store_set(store, iter,
 			PROTOCOL_COLUMN, protocol,
-#ifdef HAVE_SSL
+#if defined(HAVE_SSL)
 			SSL_COLUMN, use_ssl,
 #endif
 			MAILBOX_COLUMN, mailbox,
@@ -3285,12 +3228,12 @@ create_model(void)
 	MailAccount		*account;
 
 	store = gtk_list_store_new(N_COLUMNS,
-					G_TYPE_STRING,
-					G_TYPE_STRING,
-#ifdef HAVE_SSL
-					G_TYPE_STRING,
+							   G_TYPE_STRING,
+							   G_TYPE_STRING,
+#if defined(HAVE_SSL)
+							   G_TYPE_STRING,
 #endif
-					G_TYPE_POINTER);
+							   G_TYPE_POINTER);
 
 	for (list = config_mailbox_list; list; list = list->next)
 		{
@@ -3326,7 +3269,7 @@ reset_entries(void)
 	gtk_widget_set_sensitive(imapfolder_entry, FALSE);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(remote_combo_box), 0);
 	optmenu_auth_protocol = 0;
-#ifdef HAVE_SSL
+#if defined(HAVE_SSL)
 	gtk_combo_box_set_active(GTK_COMBO_BOX(ssl_combo_box), 0);
 #endif
 	optmenu_use_ssl = SSL_NONE;
@@ -3365,7 +3308,7 @@ default_port_entry(void)
 	return active;
 	}
 
-#ifdef HAVE_SSL
+#if defined(HAVE_SSL)
 static void
 cb_ssl_selected(GtkComboBox *widget)
 	{
@@ -3457,7 +3400,7 @@ cb_tree_selection_changed(GtkTreeSelection *selection, gpointer data)
 							  account->use_ssl));
 		gtk_combo_box_set_active(GTK_COMBO_BOX(remote_combo_box),
 					optmenu_auth_protocol);
-#ifdef HAVE_SSL
+#if defined(HAVE_SSL)
 		gtk_combo_box_set_active(GTK_COMBO_BOX(ssl_combo_box),
                                          optmenu_use_ssl);
 #endif
@@ -4069,7 +4012,7 @@ create_mail_tab(GtkWidget *tab_vbox)
 
 	i = 1;
 
-#ifdef HAVE_SSL
+#if defined(HAVE_SSL)
 	label = gtk_label_new(_("Use SSL"));
 	gtk_misc_set_alignment(GTK_MISC(label), 1.0, 0.5);
 	gtk_table_attach_defaults(GTK_TABLE(table), label, 2, 3, i, i+1);
@@ -4149,7 +4092,7 @@ create_mail_tab(GtkWidget *tab_vbox)
 	gtk_tree_view_insert_column_with_attributes(treeview, -1, _("Protocol"),
 				renderer,
 				"text", PROTOCOL_COLUMN, NULL);
-#ifdef HAVE_SSL
+#if defined(HAVE_SSL)
 	renderer = gtk_cell_renderer_text_new();
 	gtk_tree_view_insert_column_with_attributes(treeview, -1, "SSL",
 				renderer,
@@ -4319,9 +4262,7 @@ GkrellmMonitor *
 gkrellm_init_mail_monitor(void)
 	{
 #ifdef HAVE_SSL
-#ifndef HAVE_GNUTLS
 	int i, num_locks = CRYPTO_num_locks();
-#endif
 #endif
 
 	monitor_mail.name = _(monitor_mail.name);
@@ -4341,15 +4282,6 @@ gkrellm_init_mail_monitor(void)
 	_GK.decal_mail_frames = 18;
 	_GK.decal_mail_delay = 1;
 
-#ifdef HAVE_GNUTLS
-#if GNUTLS_VERSION_NUMBER <= 0x020b00
-	/* gcrypt mutex setup, only needed for GnuTLS < 2.12 */
-	gcry_control (GCRYCTL_SET_THREAD_CBS, &gk_gcry_threads_glib);
-#endif
-	gnutls_global_init();
-	SSL_load_error_strings();
-	SSL_library_init();
-#else
 #ifdef HAVE_SSL
 	SSL_load_error_strings();
 	SSL_library_init();
@@ -4360,7 +4292,6 @@ gkrellm_init_mail_monitor(void)
 		g_mutex_init(ssl_locks[i]);
 		}
 	CRYPTO_set_locking_callback(ssl_locking_cb);
-#endif
 #endif
 
 	mail_fetch = g_new0(Mailbox, 1);

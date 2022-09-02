@@ -1,7 +1,7 @@
 project(
        'gkrellm',
        'c',
-       version : run_command('cat', 'VERSION', check: true).stdout().strip(),
+       version : '2.5.0',
        license : 'GPL',
        meson_version : '>= 0.61.1',
        default_options : []
@@ -33,12 +33,20 @@ no_memdup2 = glib.version().version_compare('< 2.68.0')
 gmodule = dependency('gmodule-2.0', version : '>= 2.62.6', required : true)
 
 disable_openssl = get_option('disable_openssl')
+enable_gnutls = get_option('enable_gnutls')
 
-if disable_openssl
+if disable_openssl or enable_gnutls
 	openssl = null_dep
 else
 	openssl = dependency('openssl', version: '>= 1.1.1o', required : false)
 endif
+
+if enable_gnutls or not openssl.found()
+        gnutls = dependency('gnutls', version: '>= 3.6.16.1', required : enable_gnutls)
+else
+	gnutls = null_dep
+endif
+
 md = null_dep
 
 enable_nls = get_option('enable_nls')
@@ -71,10 +79,17 @@ sysdeps = []
 sysargs = []
 syssrc = []
 
-if openssl.found()
-	sysdeps += [openssl]
-	sysargs += ['-DHAVE_SSL']
+have_openssl = false
+have_gnutls = false
+have_md5 = false
+if gnutls.found()
+	sysdeps += [gnutls]
 	md = null_dep
+        have_gnutls = true
+elif openssl.found()
+	sysdeps += [openssl]
+	md = null_dep
+        have_openssl = true
 endif
 if host_system == 'windows'
    syssrc += ['src/sysdeps/win32.c']
@@ -84,7 +99,7 @@ elif host_system == 'freebsd'
    syssrc += ['src/sysdeps/freebsd.c', 'src/sysdeps/bsd-common.c',
                  'src/sysdeps/sensors-common.c']
 	if md.found()
-		sysargs += ['-DHAVE_MD5']
+		have_md5 = true
 		sysdeps += [md]
 	endif
    sysargs += ['-DSENSORS_COMMON']
@@ -94,7 +109,7 @@ elif host_system == 'dragonfly'
               'src/sysdeps/sensors-common.c']
    sysargs += ['-DSENSORS_COMMON']
 	if md.found()
-		sysargs += ['-DHAVE_MD5']
+		have_md5 = true
 		sysdeps += [md]
 	endif
 	sysdeps += [devstat,kvm]
@@ -102,22 +117,22 @@ elif host_system == 'netbsd'
    syssrc += ['src/sysdeps/netbsd.c', 'src/sysdeps/bsd-common.c',
                  'src/sysdeps/sensors-common.c']
 	if md.found()
-		sysargs += ['-DHAVE_MD5']
+		have_md5 = true
 		sysdeps += [md]
 	endif
 	sysdeps += [devstat,kvm]
 elif host_system == 'openbsd'
    syssrc += ['src/sysdeps/openbsd.c', 'src/sysdeps/bsd-common.c']
 	if md.found()
-		sysargs += ['-DHAVE_MD5']
+		have_md5 = true
 		sysdeps += [md]
 	endif
 	sysdeps += [devstat,kvm]
 elif host_system == 'sunos'
    syssrc += ['src/sysdeps/solaris.c']
-   sysargs += ['-m32', '-DHAVE_MD5'] # , '-D_FILE_OFFSET_BITS=32']
+   sysargs += ['-m32'] # , '-D_FILE_OFFSET_BITS=32']
 	if md.found()
-		sysargs += ['-DHAVE_MD5']
+		have_md5 = true
 		sysdeps += [md]
 	endif
    sysdeps += [devinfo,kvm,kstat,socket]
@@ -289,3 +304,16 @@ if buildserver
                         link_with : serverlinkwiths,
                         win_subsystem : 'console')
 endif
+
+
+config_h = configuration_data()
+config_h.set_quoted('GKRELLM_VERSION', meson.project_version())
+config_h.set('HAVE_SSL', have_openssl)
+config_h.set('HAVE_TLS', have_gnutls)
+config_h.set('HAVE_MD5', have_md5)
+
+configure_file(
+  input: 'config.h.in',
+  output: 'config.h',
+  configuration: config_h,
+)

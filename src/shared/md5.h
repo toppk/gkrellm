@@ -25,8 +25,6 @@
 
 #ifdef HAVE_SSL
 #include <openssl/md5.h>
-#elif defined(HAVE_GNUTLS)
-#include <gnutls/openssl.h>
 #elif defined(HAVE_MD5)
 #include <md5.h>
 #define MD5_Init MD5Init

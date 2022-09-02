@@ -1,7 +1,7 @@
 * charts to cairo
 * working on gtk3
 * nls/translation (enabled, packaged, up2date)
-* optional libraries (sensors ntlm gnutls openssl libressl gtop etc?)
+* optional libraries (sensors ntlm openssl libressl gtop etc?)
   - no extra library searching for platforms
 * no deprecations on gtk3
 * windows/macos/freebsd sysdeps
@@ -34,5 +34,3 @@
 * move to meson: HAVE_GETADDRINFO
 * missing platforms gtop supported?
 * port solaris to 64bit (replace swapctl with kstat?)
-* clean up md5
-* clean up ssl
