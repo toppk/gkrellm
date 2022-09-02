@@ -8,6 +8,7 @@
 |  Latest versions might be found at:  http://gkrellm.net
 */
 
+#include "config.h"
 
 #include "../gkrellm.h"
 #include "../gkrellm-private.h"

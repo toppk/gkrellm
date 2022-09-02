@@ -40,22 +40,6 @@
 
 #include <locale.h>
 
-#if defined(__sun) && defined(__SVR4)
-#define __solaris__
-#endif
-
-#if !defined(__FreeBSD__) && !defined(__linux__) && !defined(__NetBSD__) \
-	&& !defined(__OpenBSD__) && !defined(__solaris__) && !defined(WIN32) \
-	&& !defined(__APPLE__) && !defined(__DragonFly__)
-#define  USE_LIBGTOP
-#endif
-
-
-
-#include "gkrellmv.h"
-
-
-
 /* -------------------------------------------------------------------
 */
 #define	GKRELLM_DIR				".gkrellm2"

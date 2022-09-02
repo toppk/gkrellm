@@ -11,23 +11,11 @@
 #ifndef GKRELLM_H
 #define GKRELLM_H
 
-#if defined(GKRELLM_SERVER)
-
-#if !defined(PACKAGE)
-#define PACKAGE "gkrellmd"
-#endif
-#include "gkrellm-server.h"
-
-#else
-
-#if !defined(PACKAGE)
-#define PACKAGE "gkrellm"
-#endif
-#include "gkrellm-client.h"
-
-#endif
-
 #include "gkrellmv.h"
+
+#if defined(__sun) && defined(__SVR4)
+#define __solaris__
+#endif
 
 /* Internationalization support.
  */
@@ -49,4 +37,27 @@
 #define dcgettext(Domain, String, Type) (String)
 #define bindtextdomain(Domain, Directory) (Domain)
 #endif /* ENABLE_NLS */
+
+#if defined(GKRELLM_SERVER)
+
+#if !defined(PACKAGE)
+#define PACKAGE "gkrellmd"
+#endif
+#include "gkrellm-server.h"
+
+#else
+
+#if !defined(PACKAGE)
+#define PACKAGE "gkrellm"
+#endif
+#include "gkrellm-client.h"
+
+#endif
+
+#include "gkrellmv.h"
+
+#if defined(__sun) && defined(__SVR4)
+#define __solaris__
+#endif
+
 #endif

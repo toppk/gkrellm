@@ -12,10 +12,6 @@
 #include "../gkrellm-private.h"
 #include "../gkrellm-sysdeps.h"
 
-#if defined(USE_LIBGTOP)
-#include "../sysdeps/gtop.c"
-#endif
-
 #if !defined(WIN32)
 #include <sys/utsname.h>
 #endif

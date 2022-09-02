@@ -20,6 +20,8 @@
 #include <ws2tcpip.h>
 #endif
 
+#include "config.h"
+
 #include "../gkrellm.h"
 #include "../gkrellm-private.h"
 

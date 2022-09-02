@@ -21,13 +21,6 @@ else
    lmsensors = null_dep
 endif
 
-use_libgtop = get_option('use_libgtop')
-if use_libgtop
-   libgtop = dependency('libgtop-2.0', version: '>= 2.40.0', required : true)
-else
-   libgtop = null_dep
-endif
-
 glib = dependency('glib-2.0', version : '>= 2.62.6', required : true)
 no_memdup2 = glib.version().version_compare('< 2.68.0') 
 gmodule = dependency('gmodule-2.0', version : '>= 2.62.6', required : true)
@@ -139,13 +132,6 @@ elif host_system == 'sunos'
 elif host_system == 'linux'
    syssrc += ['src/sysdeps/linux.c', 'src/sysdeps/sensors-common.c']
    sysargs += ['-DSENSORS_COMMON']
-elif libgtop.found()
-   sysargs += ['-DUSE_LIBGTOP']
-   syssrc += ['src/sysdeps/gtop.c']
-endif
-sysargs += ['-DHAVE_GETADDRINFO']
-if no_memdup2
-    sysargs += ['-DMISSING_MEMDUP2']
 endif
 if not openssl.found() and not md.found()
    syssrc += ['src/shared/md5.c']
@@ -174,9 +160,6 @@ if buildclient
       clientdeps += lmsensors
       clientargs += '-DHAVE_LIBSENSORS=1'
    endif
-   if libgtop.found()
-      clientdeps += libgtop
-   endif
    if enable_nls
       clientargs += '-DENABLE_NLS'
    endif
@@ -191,9 +174,6 @@ serverdeps += [glib, gmodule]
 if lmsensors.found()
    serverdeps += lmsensors
    serverargs += '-DHAVE_LIBSENSORS=1'
-endif
-if libgtop.found()
-   serverdeps += libgtop
 endif
 if enable_nls
    serverargs += '-DENABLE_NLS'
@@ -310,6 +290,8 @@ config_h = configuration_data()
 config_h.set('HAVE_SSL', have_openssl)
 config_h.set('HAVE_TLS', have_gnutls)
 config_h.set('HAVE_MD5', have_md5)
+config_h.set('MISSING_MEMDUP2', no_memdup2)
+config_h.set('HAVE_GETADDRINFO', true)
 
 configure_file(
   input: 'config.h.in',

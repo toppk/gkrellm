@@ -20,10 +20,6 @@
 #include <fcntl.h>
 #include <time.h>
 
-#if (defined(__sun) && defined(__SVR4)) || defined(SOLARIS_8)
-#define __solaris__
-#endif
-
 #if !defined(WIN32)
 	#include <unistd.h>
 	#include <utime.h>

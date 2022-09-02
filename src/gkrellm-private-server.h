@@ -14,13 +14,6 @@
 #define	NI_WITHSCOPEID	0
 #endif
 
-#if !defined(__FreeBSD__) && !defined(__linux__) && !defined(__NetBSD__) \
-    && !defined(__OpenBSD__) && !defined(__solaris__) && !defined(WIN32) \
-    && !defined(__APPLE__) && !defined(__DragonFly__)
-#define  USE_LIBGTOP
-#endif
-
-
 #define SENSOR_TEMPERATURE  0
 #define SENSOR_FAN          1
 #define SENSOR_VOLTAGE      2

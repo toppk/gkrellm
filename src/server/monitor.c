@@ -8,8 +8,11 @@
 |  Latest versions might be found at:  http://gkrellm.net
 */
 
+#include "config.h"
+
 #include "../gkrellm.h"
 #include "../gkrellm-private.h"
+
 #include <inttypes.h>
 
 GList			*gkrellmd_monitor_list;

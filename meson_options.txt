@@ -12,12 +12,6 @@ option(
   description : 'only build server.'
 )
 option(
-  'use_libgtop',
-  type : 'boolean',
-  value : 'false',
-  description : 'use libgtop.'
-)
-option(
   'enable_nls',
   type : 'boolean',
   value : 'true',

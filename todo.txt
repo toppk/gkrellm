@@ -33,6 +33,5 @@
 * PACKAGE macro
 * client/sensors.c has some sysdep interface functions should be in
   systems/sensors-common.c
-* move to meson: HAVE_GETADDRINFO
 * missing platforms gtop supported?
 * port solaris to 64bit (replace swapctl with kstat?)

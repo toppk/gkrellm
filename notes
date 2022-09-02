@@ -23,9 +23,11 @@
 * reorganized source tree
 * removed deprecated functions
 * moved build automation from make to meson+ninja
+* removed gnutls and gtop 
 
 # notes
 * gtop plugin was written against very old versions of libgtop
+* gnutls was using removed openssl compatability layer
 * removed some logic for sensors/gkrellm_sys_sensors_mbmon_check in sysdeps-unix.c
 
 

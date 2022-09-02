@@ -16,3 +16,9 @@
 
 /* Whether openssl support is enabled */
 #mesondefine HAVE_SSL
+
+/* Whether g_memdup2 is available */
+#mesondefine MISSING_MEMDUP2
+
+/* Whether getaddrinfo(3) is available */
+#mesondefine HAVE_GETADDRINFO
